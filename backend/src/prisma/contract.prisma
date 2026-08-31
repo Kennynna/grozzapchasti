@@ -1,0 +1,59 @@
+// use prisma-next
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  login        String   @unique
+  passwordHash String
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+}
+
+model Category {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String?
+  spareParts  SparePart[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Mark {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  description String?
+  images      String[]  @default([])
+  models      Model[]
+  spareParts  SparePart[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Model {
+  id          Int         @id @default(autoincrement())
+  name        String
+  description String?
+  images      String[]  @default([])
+  mark        Mark        @relation(fields: [markId], references: [id], onDelete: Cascade)
+  markId      Int
+  spareParts  SparePart[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+
+  @@unique([name, markId])
+}
+
+model SparePart {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  images      String[]  @default([])
+  price       Int
+  mark        Mark     @relation(fields: [markId], references: [id], onDelete: Cascade)
+  markId      Int
+  model       Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  modelId     Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  categoryId  Int
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
