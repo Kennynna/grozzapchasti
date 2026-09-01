@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { MulterError } from 'multer';
+import { LOGIN_TOO_MANY_ATTEMPTS_MESSAGE } from '../../auth/auth.constants';
 import {
   FILE_TOO_LARGE_MESSAGE,
   TOO_MANY_PHOTOS_MESSAGE,
@@ -134,6 +135,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
     if (message === 'Payload Too Large') {
       return FILE_TOO_LARGE_MESSAGE;
+    }
+    if (
+      message === 'Too Many Requests' ||
+      message === 'ThrottlerException: Too Many Requests'
+    ) {
+      return LOGIN_TOO_MANY_ATTEMPTS_MESSAGE;
     }
     return message;
   }

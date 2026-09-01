@@ -385,6 +385,13 @@
           },
           "SparePart": {
             "fields": {
+              "article": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "categoryId": {
                 "nullable": false,
                 "type": {
@@ -422,14 +429,14 @@
                 }
               },
               "markId": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
               "modelId": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/int4@1",
                   "kind": "scalar"
@@ -506,6 +513,9 @@
             },
             "storage": {
               "fields": {
+                "article": {
+                  "column": "article"
+                },
                 "categoryId": {
                   "column": "categoryId"
                 },
@@ -830,6 +840,11 @@
                 }
               ],
               "columns": {
+                "article": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "categoryId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
@@ -871,12 +886,12 @@
                 "markId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
-                  "nullable": false
+                  "nullable": true
                 },
                 "modelId": {
                   "codecId": "pg/int4@1",
                   "nativeType": "int4",
-                  "nullable": false
+                  "nullable": true
                 },
                 "name": {
                   "codecId": "pg/text@1",
@@ -978,7 +993,13 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "article"
+                  ]
+                }
+              ]
             }
           }
         },
@@ -986,7 +1007,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "b0007aa47ed56c4022544a319dbf2be144dee4d35bf079aec81d72e8888156ac"
+    "storageHash": "3bf2e8ac1ba8d51515e161eadb6941286b9cb761294f0165a7652ef7ee7f4a3f"
   },
   "execution": {
     "executionHash": "8c602640d7c4ce14a2e341312c151e19a0e5c41ea130e8674d694d579934338c",

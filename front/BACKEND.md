@@ -28,7 +28,8 @@ Authorization: Bearer <accessToken>
 ```
 
 Без токена → `401` `"Нужна авторизация администратора"`.  
-Протухший токен → `401` `"Сессия недействительна"`.
+Протухший токен → `401` `"Сессия недействительна"`.  
+Больше 5 попыток входа с одного IP за 15 минут → `429` `"Слишком много попыток входа. Подождите 15 минут"`.
 
 `GET /api/auth/me` — тоже с токеном → `{ id, login }`.
 
@@ -60,8 +61,10 @@ Authorization: Bearer <accessToken>
 | 400 | больше 3 фото | `Можно загрузить не больше 3 фотографий` |
 | 400 | модель не от этой марки | `Модель не принадлежит выбранной марке` |
 | 401 | нет/битый JWT | см. выше |
+| 429 | больше 5 логинов с IP за 15 мин | `Слишком много попыток входа. Подождите 15 минут` |
 | 404 | нет записи | `Марка не найдена` / `Модель не найдена` / `Категория не найдена` / `Запчасть не найдена` |
 | 409 | имя занято | `Марка с таким названием уже есть` (аналогично модель/категория) |
+| 409 | артикул занят | `Запчасть с таким артикулом уже есть` |
 | 409 | удалить категорию с запчастями | `Нельзя удалить категорию, пока к ней привязаны запчасти` |
 | 500 | сбой записи | `Не удалось создать марку` / `Не удалось обновить марку` (то же для модели, категории, запчасти) |
 | 500 | прочее | `Внутренняя ошибка сервера` |
@@ -91,10 +94,12 @@ PATCH с новыми `images` **добавляет** к уже существу
 Mark      { id, name, description: string | null, images: string[], createdAt, updatedAt }
 Model     { id, name, description, images, markId, createdAt, updatedAt }
 Category  { id, name, description, createdAt, updatedAt }
-SparePart { id, name, description, images, price, markId, modelId, categoryId, createdAt, updatedAt }
+SparePart { id, name, article: string | null, description, images, price, markId: number | null, modelId: number | null, categoryId, createdAt, updatedAt }
 ```
 
-`price` — целые рубли, ≥ 1.
+`price` — целые рубли, ≥ 1.  
+`article` — опциональный артикул, unique если задан. Пустая строка → `null`. На карточке показывать только если не `null`.  
+`markId` / `modelId` — применимость. Оба `null` = все авто. Только `markId` = все модели марки. Оба заданы = конкретное авто. Модель без марки → 400.
 
 ---
 
@@ -147,8 +152,8 @@ SparePart { id, name, description, images, price, markId, modelId, categoryId, c
 |---|---|---|
 | GET | `/api/spare-parts` | публично. для витрины грузить без query |
 | GET | `/api/spare-parts/:id` | публично |
-| POST | `/api/spare-parts` | `name`, `price`, `markId`, `modelId`, `categoryId` обяз. `description?`, `images?`. `modelId` должен быть от `markId` |
-| PATCH | `/api/spare-parts/:id` | любые из тех же полей |
+| POST | `/api/spare-parts` | `name`, `price`, `categoryId` обяз. `markId?`, `modelId?`, `article?`, `description?`, `images?`. `null`/пусто = не привязано. `modelId` только вместе с `markId` и от этой марки |
+| PATCH | `/api/spare-parts/:id` | любые из тех же полей. `markId`/`modelId`: `null` снимает привязку |
 | DELETE | `/api/spare-parts/:id` | |
 | DELETE | `/api/spare-parts/:id/images/:filename` | |
 
@@ -179,6 +184,7 @@ price=890
 markId=1
 modelId=1
 categoryId=3
+article=BMW-OIL-11427566327
 description=опционально
 images=<file>
 images=<file>

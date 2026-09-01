@@ -7,7 +7,7 @@ import {
   IsString,
   MaxLength,
 } from 'class-validator';
-import { toInt, trimString } from '../../common/validation/transforms';
+import { toInt, trimString, trimToNull } from '../../common/validation/transforms';
 
 export class CreateModelDto {
   @Transform(trimString)
@@ -16,11 +16,11 @@ export class CreateModelDto {
   @MaxLength(100, { message: 'Название не длиннее 100 символов' })
   name: string;
 
-  @Transform(trimString)
+  @Transform(trimToNull)
   @IsOptional()
   @IsString({ message: 'Описание должно быть строкой' })
   @MaxLength(2000, { message: 'Описание не длиннее 2000 символов' })
-  description?: string;
+  description?: string | null;
 
   @Transform(toInt)
   @IsNotEmpty({ message: 'Марка обязательна' })

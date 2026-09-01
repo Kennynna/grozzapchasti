@@ -20,9 +20,10 @@ async function main() {
     { name: 'Фильтры', description: 'Масляные, воздушные, салонные' },
     { name: 'Ходовая', description: 'Подвеска и рулевое' },
     { name: 'Электрика', description: 'Датчики, генератор, стартер' },
+    { name: 'Аксессуары', description: 'Коврики, чехлы и прочее' },
   ]);
 
-  const [engine, brakes, filters] = categories;
+  const [engine, brakes, filters, , , accessories] = categories;
 
   const marks = await db.orm.public.Mark.createAll([
     {
@@ -70,6 +71,7 @@ async function main() {
   const spareParts = await db.orm.public.SparePart.createAll([
     {
       name: 'Масляный фильтр',
+      article: 'BMW-OIL-11427566327',
       description: 'Фильтр масла для BMW X5',
       images: [],
       price: 890,
@@ -79,6 +81,7 @@ async function main() {
     },
     {
       name: 'Тормозные колодки',
+      article: 'MB-BRK-A0004200820',
       description: 'Передние колодки для Mercedes C-Class',
       images: [],
       price: 4500,
@@ -97,12 +100,33 @@ async function main() {
     },
     {
       name: 'Ремень ГРМ',
+      article: 'BMW-TBG-11317586925',
       description: 'Комплект ГРМ для BMW X5',
       images: [],
       price: 8900,
       markId: bmw.id,
       modelId: x5.id,
       categoryId: engine.id,
+    },
+    {
+      name: 'Салонный фильтр BMW',
+      article: 'BMW-CAB-ALL',
+      description: 'Для всех моделей BMW',
+      images: [],
+      price: 1450,
+      markId: bmw.id,
+      modelId: null,
+      categoryId: filters.id,
+    },
+    {
+      name: 'Коврик универсальный',
+      article: 'UNI-MAT-001',
+      description: 'Подходит для всех автомобилей',
+      images: [],
+      price: 2500,
+      markId: null,
+      modelId: null,
+      categoryId: accessories.id,
     },
   ]);
 

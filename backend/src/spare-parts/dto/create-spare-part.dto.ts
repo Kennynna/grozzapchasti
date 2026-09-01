@@ -5,10 +5,11 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  Max,
   MaxLength,
   Min,
 } from 'class-validator';
-import { toInt, trimString } from '../../common/validation/transforms';
+import { toInt, toNullableInt, trimString, trimToNull } from '../../common/validation/transforms';
 
 export class CreateSparePartDto {
   @Transform(trimString)
@@ -17,29 +18,36 @@ export class CreateSparePartDto {
   @MaxLength(200, { message: 'Название не длиннее 200 символов' })
   name: string;
 
-  @Transform(trimString)
+  @Transform(trimToNull)
+  @IsOptional()
+  @IsString({ message: 'Артикул должен быть строкой' })
+  @MaxLength(64, { message: 'Артикул не длиннее 64 символов' })
+  article?: string | null;
+
+  @Transform(trimToNull)
   @IsOptional()
   @IsString({ message: 'Описание должно быть строкой' })
   @MaxLength(4000, { message: 'Описание не длиннее 4000 символов' })
-  description?: string;
+  description?: string | null;
 
   @Transform(toInt)
   @IsNotEmpty({ message: 'Цена обязательна' })
   @IsInt({ message: 'Цена должна быть целым числом' })
   @Min(1, { message: 'Цена должна быть больше 0' })
+  @Max(99_999_999, { message: 'Цена слишком большая' })
   price: number;
 
-  @Transform(toInt)
-  @IsNotEmpty({ message: 'Марка обязательна' })
+  @Transform(toNullableInt)
+  @IsOptional()
   @IsInt({ message: 'Марка должна быть числом' })
-  @IsPositive({ message: 'Марка обязательна' })
-  markId: number;
+  @IsPositive({ message: 'Марка должна быть больше 0' })
+  markId?: number | null;
 
-  @Transform(toInt)
-  @IsNotEmpty({ message: 'Модель обязательна' })
+  @Transform(toNullableInt)
+  @IsOptional()
   @IsInt({ message: 'Модель должна быть числом' })
-  @IsPositive({ message: 'Модель обязательна' })
-  modelId: number;
+  @IsPositive({ message: 'Модель должна быть больше 0' })
+  modelId?: number | null;
 
   @Transform(toInt)
   @IsNotEmpty({ message: 'Категория обязательна' })

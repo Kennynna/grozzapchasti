@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { mkdir, unlink, writeFile } from 'fs/promises';
 import { join, resolve } from 'path';
 import { randomUUID } from 'crypto';
+import { sniffImageMime } from './image-type';
 import {
   EXT_BY_MIME,
   FILE_TOO_LARGE_MESSAGE,
@@ -42,7 +43,11 @@ export class UploadsService {
         if (file.size > MAX_FILE_SIZE) {
           throw new BadRequestException(FILE_TOO_LARGE_MESSAGE);
         }
-        const ext = EXT_BY_MIME[file.mimetype];
+        const sniffed = sniffImageMime(file.buffer);
+        if (!sniffed || sniffed !== file.mimetype) {
+          throw new BadRequestException(INVALID_IMAGE_TYPE_MESSAGE);
+        }
+        const ext = EXT_BY_MIME[sniffed];
         if (!ext) {
           throw new BadRequestException(INVALID_IMAGE_TYPE_MESSAGE);
         }
