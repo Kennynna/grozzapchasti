@@ -2,3 +2,24 @@
 .idea
 .vscode
 *.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# backend
+backend/dist
+backend/node_modules
+backend/build
+backend/coverage
+backend/.nyc_output
+backend/.env
+backend/.env.development.local
+backend/.env.test.local
+backend/.env.production.local
+backend/.env.local
+backend/.temp
+backend/.tmp
+backend/uploads/*
+!backend/uploads/.gitkeep
