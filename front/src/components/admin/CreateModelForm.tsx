@@ -6,7 +6,8 @@ import { EntitySelect } from '@/components/admin/EntitySelect'
 import { FormError } from '@/components/admin/FormError'
 import { ImageField } from '@/components/admin/ImageField'
 import { optionalText } from '@/components/admin/form-utils'
-import { Button } from '@/components/ui/button'
+import { MutationBusy, SubmitButton } from '@/components/mutation-ui'
+import { FormFieldSkeleton } from '@/components/query-skeletons'
 import {
   Dialog,
   DialogContent,
@@ -63,21 +64,26 @@ export function CreateModelForm({ defaultMarkId, onCreated }: CreateModelFormPro
 
   return (
     <>
-      <form onSubmit={onSubmit} className="space-y-6">
+      <MutationBusy pending={mutation.isPending}>
+        <form onSubmit={onSubmit} className="space-y-6">
         <FieldGroup>
-          <Field>
-            <AdminFieldLabel htmlFor="model-mark" required>
-              Марка
-            </AdminFieldLabel>
-            <EntitySelect
-              id="model-mark"
-              items={marks}
-              value={markId}
-              onChange={setMarkId}
-              onAdd={() => setMarkModalOpen(true)}
-              placeholder="Выберите марку"
-            />
-          </Field>
+          {marksQuery.isPending ? (
+            <FormFieldSkeleton />
+          ) : (
+            <Field>
+              <AdminFieldLabel htmlFor="model-mark" required>
+                Марка
+              </AdminFieldLabel>
+              <EntitySelect
+                id="model-mark"
+                items={marks}
+                value={markId}
+                onChange={setMarkId}
+                onAdd={() => setMarkModalOpen(true)}
+                placeholder="Выберите марку"
+              />
+            </Field>
+          )}
           <Field>
             <AdminFieldLabel htmlFor="model-name" required>
               Название
@@ -105,10 +111,11 @@ export function CreateModelForm({ defaultMarkId, onCreated }: CreateModelFormPro
           </Field>
         </FieldGroup>
         {mutation.isError ? <FormError error={mutation.error} /> : null}
-        <Button type="submit" disabled={!valid || mutation.isPending}>
-          {mutation.isPending ? 'Сохраняем…' : 'Создать'}
-        </Button>
+        <SubmitButton type="submit" pending={mutation.isPending} pendingLabel="Создаём" disabled={!valid}>
+          Создать
+        </SubmitButton>
       </form>
+      </MutationBusy>
       <CreateMarkModal
         open={markModalOpen}
         onOpenChange={setMarkModalOpen}

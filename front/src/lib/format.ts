@@ -66,23 +66,25 @@ export function catalogPartsForView(parts: SparePart[], search: CatalogSearch) {
 }
 
 /** Соседние товары на странице запчасти: то же авто, универсальные, та же категория. */
-export function relatedPartsFor(part: SparePart, parts: SparePart[], limit = 6) {
+export function relatedPartsFor(part: SparePart, parts: SparePart[], limit?: number) {
   const others = parts.filter((item) => item.id !== part.id)
+  let related: SparePart[]
   if (part.markId && part.modelId) {
     const { matched, suggested } = catalogPartsForView(others, {
       markId: part.markId,
       modelId: part.modelId,
       categoryId: part.categoryId,
     })
-    return [...matched, ...suggested].slice(0, limit)
-  }
-  if (part.markId) {
+    related = [...matched, ...suggested]
+  } else if (part.markId) {
     const sameMark = others.filter((item) => item.markId === part.markId)
     const universals = others.filter((item) => !item.markId)
-    return [...sameMark, ...universals].slice(0, limit)
+    related = [...sameMark, ...universals]
+  } else {
+    const universals = others.filter((item) => !item.markId)
+    const sameCategory = universals.filter((item) => item.categoryId === part.categoryId)
+    const rest = universals.filter((item) => item.categoryId !== part.categoryId)
+    related = [...sameCategory, ...rest]
   }
-  const universals = others.filter((item) => !item.markId)
-  const sameCategory = universals.filter((item) => item.categoryId === part.categoryId)
-  const rest = universals.filter((item) => item.categoryId !== part.categoryId)
-  return [...sameCategory, ...rest].slice(0, limit)
+  return limit ? related.slice(0, limit) : related
 }

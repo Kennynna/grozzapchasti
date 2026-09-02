@@ -9,10 +9,10 @@ import {
 } from '@/components/admin/lazy-dialogs'
 import { TelegramOrderActions } from '@/components/cart/TelegramOrderActions'
 import { ImageGallery } from '@/components/catalog/ImageGallery'
-import { SparePartCard } from '@/components/catalog/SparePartCard'
+import { SuggestedPartsStrip } from '@/components/catalog/SuggestedPartsStrip'
 import { QueryStatus } from '@/components/QueryStatus'
+import { ProductPageSkeleton, SuggestedStripSkeleton } from '@/components/query-skeletons'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { site } from '@/config/site'
 import { formatPrice, relatedPartsFor } from '@/lib/format'
 import { partFitLabel } from '@/lib/part-fit'
@@ -47,6 +47,8 @@ export const Route = createFileRoute('/parts/$partId')({
     },
     stringify: ({ partId }) => ({ partId: String(partId) }),
   },
+  pendingMs: 0,
+  pendingComponent: PartPagePending,
   loader: async ({ params }) => {
     try {
       const [part] = await Promise.all([
@@ -75,6 +77,14 @@ export const Route = createFileRoute('/parts/$partId')({
   component: PartPage,
 })
 
+function PartPagePending() {
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-10 md:py-16">
+      <ProductPageSkeleton />
+    </div>
+  )
+}
+
 function PartPage() {
   const { partId } = Route.useParams()
   const navigate = useNavigate()
@@ -100,10 +110,7 @@ function PartPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 md:py-16">
-      <QueryStatus
-        query={partQuery}
-        skeleton={<Skeleton className="aspect-[4/3] max-w-xl rounded-lg" />}
-      >
+      <QueryStatus query={partQuery} skeleton={<ProductPageSkeleton />}>
         {(part) => {
           const mark = marksQuery.data?.find((item) => item.id === part.markId)
           const model = modelsQuery.data?.find((item) => item.id === part.modelId)
@@ -131,7 +138,11 @@ function PartPage() {
                   setDeleteOpen(true)
                 }}
               />
-              {related.length > 0 ? (
+              {partsQuery.isPending ? (
+                <div className="mt-16 border-t border-border pt-10">
+                  <SuggestedStripSkeleton />
+                </div>
+              ) : related.length > 0 ? (
                 <RelatedParts
                   parts={related}
                   marks={marksQuery.data ?? []}
@@ -332,19 +343,16 @@ function RelatedParts({
   return (
     <section className="mt-16 space-y-4 border-t border-border pt-10">
       <h2 className="text-lg font-semibold">Возможно, вам понадобится</h2>
-      <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-3">
-        {parts.map((part) => (
-          <SparePartCard
-            key={part.id}
-            part={part}
-            markName={partFitLabel(
-              part,
-              part.markId ? marksById.get(part.markId) : undefined,
-              part.modelId ? modelsById.get(part.modelId) : undefined,
-            )}
-          />
-        ))}
-      </div>
+      <SuggestedPartsStrip
+        parts={parts}
+        markLabel={(part) =>
+          partFitLabel(
+            part,
+            part.markId ? marksById.get(part.markId) : undefined,
+            part.modelId ? modelsById.get(part.modelId) : undefined,
+          )
+        }
+      />
     </section>
   )
 }

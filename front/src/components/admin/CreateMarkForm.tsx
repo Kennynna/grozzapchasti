@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import { FormError } from '@/components/admin/FormError'
 import { ImageField } from '@/components/admin/ImageField'
 import { optionalText } from '@/components/admin/form-utils'
-import { Button } from '@/components/ui/button'
+import { MutationBusy, SubmitButton } from '@/components/mutation-ui'
 import {
   Dialog,
   DialogContent,
@@ -54,39 +54,41 @@ export function CreateMarkForm({ onCreated }: CreateMarkFormProps) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <FieldGroup>
-        <Field>
-          <AdminFieldLabel htmlFor="mark-name" required>
-            Название
-          </AdminFieldLabel>
-          <Input
-            id="mark-name"
-            name="name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-          />
-        </Field>
-        <Field>
-          <AdminFieldLabel htmlFor="mark-description">Описание</AdminFieldLabel>
-          <Textarea
-            id="mark-description"
-            name="description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-          />
-        </Field>
-        <Field>
-          <AdminFieldLabel>Фото</AdminFieldLabel>
-          <ImageField files={images} onChange={setImages} disabled={mutation.isPending} />
-        </Field>
-      </FieldGroup>
-      {mutation.isError ? <FormError error={mutation.error} /> : null}
-      <Button type="submit" disabled={!valid || mutation.isPending}>
-        {mutation.isPending ? 'Сохраняем…' : 'Создать'}
-      </Button>
-    </form>
+    <MutationBusy pending={mutation.isPending}>
+      <form onSubmit={onSubmit} className="space-y-6">
+        <FieldGroup>
+          <Field>
+            <AdminFieldLabel htmlFor="mark-name" required>
+              Название
+            </AdminFieldLabel>
+            <Input
+              id="mark-name"
+              name="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
+          </Field>
+          <Field>
+            <AdminFieldLabel htmlFor="mark-description">Описание</AdminFieldLabel>
+            <Textarea
+              id="mark-description"
+              name="description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+          </Field>
+          <Field>
+            <AdminFieldLabel>Фото</AdminFieldLabel>
+            <ImageField files={images} onChange={setImages} disabled={mutation.isPending} />
+          </Field>
+        </FieldGroup>
+        {mutation.isError ? <FormError error={mutation.error} /> : null}
+        <SubmitButton type="submit" pending={mutation.isPending} pendingLabel="Создаём" disabled={!valid}>
+          Создать
+        </SubmitButton>
+      </form>
+    </MutationBusy>
   )
 }
 

@@ -6,15 +6,14 @@ import {
   EditMarkDialog,
 } from '@/components/admin/lazy-dialogs'
 import { QueryStatus } from '@/components/QueryStatus'
+import { StripTilesSkeleton } from '@/components/query-skeletons'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { previewStrip } from '@/lib/catalog-strip'
 import { cn } from '@/lib/utils'
 import { firstImageSrc, useDeleteMarkMutation, type Mark } from '@/queries'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { AdminAddTile } from './AdminAddTile'
 import { CardImage } from './CardImage'
-import { HorizontalScroller } from './HorizontalScroller'
 import { ShowAllTile, StripOrWrap } from './ShowAll'
 
 type MarksStripProps = {
@@ -48,13 +47,7 @@ export function MarksStrip({ query, selectedId, onSelect, isAdmin }: MarksStripP
         query={query}
         isEmpty={(items) => items.length === 0 && !isAdmin}
         emptyMessage="Марок пока нет"
-        skeleton={
-          <HorizontalScroller>
-            {Array.from({ length: 4 }, (_, index) => (
-              <Skeleton key={index} className="h-28 w-36 shrink-0 rounded-lg" />
-            ))}
-          </HorizontalScroller>
-        }
+        skeleton={<StripTilesSkeleton />}
       >
         {(items) => {
           const { items: preview, hasMore } = previewStrip(items, selectedId)

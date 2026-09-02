@@ -5,6 +5,7 @@ import { EntitySelect } from '@/components/admin/EntitySelect'
 import { FormError } from '@/components/admin/FormError'
 import { ImageField } from '@/components/admin/ImageField'
 import { isTextDirty } from '@/components/admin/form-utils'
+import { MutationBusy, SubmitButton } from '@/components/mutation-ui'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -16,6 +17,7 @@ import { AdminFieldLabel } from '@/components/admin/AdminFieldLabel'
 import { Field, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { FormFieldSkeleton } from '@/components/query-skeletons'
 import {
   imageFilename,
   useDeleteModelImageMutation,
@@ -96,21 +98,26 @@ function EditModelForm({ model, onDone }: { model: Model; onDone: () => void }) 
 
   return (
     <>
+      <MutationBusy pending={mutation.isPending || deleteImage.isPending}>
       <form onSubmit={onSubmit} className="space-y-6">
         <FieldGroup>
-          <Field>
-            <AdminFieldLabel htmlFor="edit-model-mark" required>
-              Марка
-            </AdminFieldLabel>
-            <EntitySelect
-              id="edit-model-mark"
-              items={marks}
-              value={markId}
-              onChange={setMarkId}
-              onAdd={() => setMarkModalOpen(true)}
-              placeholder="Выберите марку"
-            />
-          </Field>
+          {marksQuery.isPending ? (
+            <FormFieldSkeleton />
+          ) : (
+            <Field>
+              <AdminFieldLabel htmlFor="edit-model-mark" required>
+                Марка
+              </AdminFieldLabel>
+              <EntitySelect
+                id="edit-model-mark"
+                items={marks}
+                value={markId}
+                onChange={setMarkId}
+                onAdd={() => setMarkModalOpen(true)}
+                placeholder="Выберите марку"
+              />
+            </Field>
+          )}
           <Field>
             <AdminFieldLabel htmlFor="edit-model-name" required>
               Название
@@ -157,14 +164,20 @@ function EditModelForm({ model, onDone }: { model: Model; onDone: () => void }) 
         </FieldGroup>
         {mutation.isError ? <FormError error={mutation.error} /> : null}
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onDone}>
+          <Button type="button" variant="outline" disabled={mutation.isPending} onClick={onDone}>
             Отмена
           </Button>
-          <Button type="submit" disabled={!valid || !dirty || mutation.isPending}>
-            {mutation.isPending ? 'Сохраняем…' : 'Сохранить'}
-          </Button>
+          <SubmitButton
+            type="submit"
+            pending={mutation.isPending}
+            pendingLabel="Сохраняем"
+            disabled={!valid || !dirty}
+          >
+            Сохранить
+          </SubmitButton>
         </div>
       </form>
+      </MutationBusy>
       <CreateMarkModal
         open={markModalOpen}
         onOpenChange={setMarkModalOpen}

@@ -1,6 +1,5 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import {
   getApiErrorDetails,
@@ -14,7 +13,7 @@ type QueryStatusProps<T> = {
   query: UseQueryResult<T>
   isEmpty?: (data: T) => boolean
   emptyMessage?: string
-  skeleton?: ReactNode
+  skeleton: ReactNode
   children: (data: T) => ReactNode
 }
 
@@ -29,7 +28,11 @@ export function QueryStatus<T>({
   const { isBackgroundRefetch, isStale } = getQueryFlags(query)
 
   if (status === 'loading') {
-    return <>{skeleton ?? <Skeleton className="h-24 w-full" />}</>
+    return (
+      <div aria-busy="true" aria-live="polite">
+        {skeleton}
+      </div>
+    )
   }
 
   if (status === 'error') {

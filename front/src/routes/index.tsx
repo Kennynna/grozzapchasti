@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Catalog } from '@/components/catalog/Catalog'
+import { Catalog, CatalogPending } from '@/components/catalog/Catalog'
 import { HomeHero } from '@/components/home/HomeHero'
 import { site } from '@/config/site'
 import { validateCatalogSearch } from '@/lib/catalog-search'
@@ -13,6 +13,8 @@ import {
 
 export const Route = createFileRoute('/')({
   validateSearch: validateCatalogSearch,
+  pendingMs: 0,
+  pendingComponent: HomePending,
   loader: () =>
     Promise.all([
       queryClient.ensureQueryData(marksQueries.list()),
@@ -28,6 +30,21 @@ export const Route = createFileRoute('/')({
   }),
   component: HomePage,
 })
+
+function HomePending() {
+  const search = Route.useSearch()
+  return (
+    <>
+      <HomeHero />
+      <section
+        id="catalog"
+        className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
+      >
+        <CatalogPending markId={search.markId} modelId={search.modelId} />
+      </section>
+    </>
+  )
+}
 
 function HomePage() {
   return (

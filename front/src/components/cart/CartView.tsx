@@ -3,8 +3,8 @@ import { Minus, Plus, Trash2 } from 'lucide-react'
 import { QueryStatus } from '@/components/QueryStatus'
 import { TelegramOrderActions } from '@/components/cart/TelegramOrderActions'
 import { CardImage } from '@/components/catalog/CardImage'
+import { CartLinesSkeleton } from '@/components/query-skeletons'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { formatPrice } from '@/lib/format'
 import { orderTotal, type OrderLine } from '@/lib/order-message'
 import { firstImageSrc, useSparePartsQuery, type SparePart } from '@/queries'
@@ -192,13 +192,7 @@ export function CartView() {
   return (
     <QueryStatus
       query={partsQuery}
-      skeleton={
-        <div className="mt-8 space-y-4">
-          {Array.from({ length: 3 }, (_, index) => (
-            <Skeleton key={index} className="h-24 rounded-lg" />
-          ))}
-        </div>
-      }
+      skeleton={<CartLinesSkeleton />}
     >
       {(parts) => <CartItems items={items} parts={parts} />}
     </QueryStatus>

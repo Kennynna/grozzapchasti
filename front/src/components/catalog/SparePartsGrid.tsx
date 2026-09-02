@@ -5,7 +5,7 @@ import {
   EditPartDialog,
 } from '@/components/admin/lazy-dialogs'
 import { QueryStatus } from '@/components/QueryStatus'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CatalogPartsSkeleton, partsGridClass } from '@/components/query-skeletons'
 import { partFitLabel } from '@/lib/part-fit'
 import { cn } from '@/lib/utils'
 import { useDeleteSparePartMutation, type Mark, type Model, type SparePart } from '@/queries'
@@ -14,8 +14,7 @@ import { AdminAddTile } from './AdminAddTile'
 import { CatalogEmpty } from './CatalogEmpty'
 import { CatalogPagination } from './CatalogPagination'
 import { SparePartCard } from './SparePartCard'
-
-const gridClass = 'grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-3'
+import { SuggestedPartsStrip } from './SuggestedPartsStrip'
 
 type SparePartsGridProps = {
   query: UseQueryResult<SparePart[]>
@@ -74,13 +73,7 @@ export function SparePartsGrid({
     <>
       <QueryStatus
         query={query}
-        skeleton={
-          <div className={gridClass}>
-            {Array.from({ length: 6 }, (_, index) => (
-              <Skeleton key={index} className="aspect-[4/3] rounded-lg" />
-            ))}
-          </div>
-        }
+        skeleton={<CatalogPartsSkeleton />}
       >
         {() => (
           <div className="space-y-10">
@@ -88,7 +81,7 @@ export function SparePartsGrid({
               <div className="space-y-6">
                 <CatalogEmpty onReset={onResetFilters} />
                 {isAdmin ? (
-                  <div className={gridClass}>
+                  <div className={partsGridClass}>
                     <AdminAddTile
                       isAdmin={isAdmin}
                       to="/admin/new/part"
@@ -100,7 +93,7 @@ export function SparePartsGrid({
               </div>
             ) : showMainGrid ? (
               <div className="space-y-6">
-                <div className={gridClass}>
+                <div className={partsGridClass}>
                   <AdminAddTile
                     isAdmin={isAdmin && page === 1}
                     to="/admin/new/part"
@@ -128,18 +121,13 @@ export function SparePartsGrid({
                 className={cn('space-y-3', hasMainBlock && 'border-t border-border pt-10')}
               >
                 <h2 className="text-lg font-semibold">Возможно, вам понадобится</h2>
-                <div className={gridClass}>
-                  {suggestedParts.map((part) => (
-                    <SparePartCard
-                      key={part.id}
-                      part={part}
-                      markName={markLabel(part)}
-                      isAdmin={isAdmin}
-                      onEdit={() => openEdit(part.id)}
-                      onDelete={() => openDelete(part)}
-                    />
-                  ))}
-                </div>
+                <SuggestedPartsStrip
+                  parts={suggestedParts}
+                  markLabel={markLabel}
+                  isAdmin={isAdmin}
+                  onEdit={openEdit}
+                  onDelete={openDelete}
+                />
               </section>
             ) : null}
           </div>

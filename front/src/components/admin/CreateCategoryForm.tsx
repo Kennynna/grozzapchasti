@@ -3,7 +3,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { FormError } from '@/components/admin/FormError'
 import { optionalText } from '@/components/admin/form-utils'
-import { Button } from '@/components/ui/button'
+import { MutationBusy, SubmitButton } from '@/components/mutation-ui'
 import {
   Dialog,
   DialogContent,
@@ -51,35 +51,37 @@ export function CreateCategoryForm({ onCreated }: CreateCategoryFormProps) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
-      <FieldGroup>
-        <Field>
-          <AdminFieldLabel htmlFor="category-name" required>
-            Название
-          </AdminFieldLabel>
-          <Input
-            id="category-name"
-            name="name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-          />
-        </Field>
-        <Field>
-          <AdminFieldLabel htmlFor="category-description">Описание</AdminFieldLabel>
-          <Textarea
-            id="category-description"
-            name="description"
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-          />
-        </Field>
-      </FieldGroup>
-      {mutation.isError ? <FormError error={mutation.error} /> : null}
-      <Button type="submit" disabled={!valid || mutation.isPending}>
-        {mutation.isPending ? 'Сохраняем…' : 'Создать'}
-      </Button>
-    </form>
+    <MutationBusy pending={mutation.isPending}>
+      <form onSubmit={onSubmit} className="space-y-6">
+        <FieldGroup>
+          <Field>
+            <AdminFieldLabel htmlFor="category-name" required>
+              Название
+            </AdminFieldLabel>
+            <Input
+              id="category-name"
+              name="name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              required
+            />
+          </Field>
+          <Field>
+            <AdminFieldLabel htmlFor="category-description">Описание</AdminFieldLabel>
+            <Textarea
+              id="category-description"
+              name="description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+            />
+          </Field>
+        </FieldGroup>
+        {mutation.isError ? <FormError error={mutation.error} /> : null}
+        <SubmitButton type="submit" pending={mutation.isPending} pendingLabel="Создаём" disabled={!valid}>
+          Создать
+        </SubmitButton>
+      </form>
+    </MutationBusy>
   )
 }
 

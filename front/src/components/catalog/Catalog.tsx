@@ -14,6 +14,11 @@ import {
   useSparePartsQuery,
 } from '@/queries'
 import { useCatalogHydrated, useCatalogStore } from '@/stores'
+import {
+  CatalogPartsSkeleton,
+  CategoryChipsSkeleton,
+  StripTilesSkeleton,
+} from '@/components/query-skeletons'
 import { CategoryChips } from './CategoryChips'
 import { MarksStrip } from './MarksStrip'
 import { ModelsStrip } from './ModelsStrip'
@@ -166,10 +171,10 @@ export function Catalog() {
           isAdmin={isAdmin}
           onSelect={(id) => patchCatalog({ modelId: id })}
         />
-      ) : (
+      ) : marksQuery.isPending ? null : (
         <p className="text-sm text-muted-foreground">Выберите марку, чтобы увидеть модели</p>
       )}
-      {markId && !modelId ? (
+      {markId && !modelId && !modelsQuery.isPending ? (
         <p className="text-sm text-muted-foreground">Выберите модель, чтобы увидеть категории</p>
       ) : null}
       {showGrid ? (
@@ -201,6 +206,49 @@ export function Catalog() {
             totalPages={paged.totalPages}
             onPage={(page) => patchCatalog({ page: page === 1 ? undefined : page })}
           />
+        </>
+      ) : null}
+    </div>
+  )
+}
+
+export function CatalogPending({
+  markId,
+  modelId,
+}: {
+  markId?: number
+  modelId?: number
+}) {
+  const showGrid = Boolean(markId && modelId)
+
+  return (
+    <div className="space-y-10" aria-busy="true" aria-live="polite">
+      <section className="space-y-3">
+        <div>
+          <h2 className="text-lg font-semibold">Марка</h2>
+          <p className="text-sm text-muted-foreground">Выберите марку</p>
+        </div>
+        <StripTilesSkeleton />
+      </section>
+      {markId ? (
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-lg font-semibold">Модель</h2>
+            <p className="text-sm text-muted-foreground">Выберите модель</p>
+          </div>
+          <StripTilesSkeleton />
+        </section>
+      ) : null}
+      {showGrid ? (
+        <>
+          <section className="space-y-3">
+            <div>
+              <h2 className="text-lg font-semibold">Категория</h2>
+              <p className="text-sm text-muted-foreground">Выберите категорию</p>
+            </div>
+            <CategoryChipsSkeleton />
+          </section>
+          <CatalogPartsSkeleton />
         </>
       ) : null}
     </div>

@@ -4,7 +4,8 @@
 // Файл домена = ключи + queryFn + queryOptions + хуки. Ключи:
 //   ['marks'] / ['marks','list'] / ['marks','detail', id]  (то же для models, categories, spare-parts, auth)
 // Мутации: update/delete/фото — optimistic + rollback; create — invalidate lists.
-// UI-состояния запроса: getQueryViewStatus + getQueryFlags, в разметке — <QueryStatus>.
+// UI-состояния запроса: getQueryViewStatus + getQueryFlags, в разметке — <QueryStatus> со скелетоном из query-skeletons.
+// Мутации: <MutationBusy> + <SubmitButton> из mutation-ui.
 export { ApiError, getApiErrorDetails, getApiErrorMessage } from './http'
 export { getAccessToken, setAccessToken, useAccessToken } from './auth-token'
 export { catalogQueryDefaults, queryClient } from './query-client'

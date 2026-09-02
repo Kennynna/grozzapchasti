@@ -5,13 +5,14 @@ import { FormError } from '@/components/admin/FormError'
 import { ImageField } from '@/components/admin/ImageField'
 import { PartFitFields } from '@/components/admin/PartFitFields'
 import { optionalText } from '@/components/admin/form-utils'
-import { Button } from '@/components/ui/button'
 import { AdminFieldLabel } from '@/components/admin/AdminFieldLabel'
 import { EntitySelect } from '@/components/admin/EntitySelect'
 import { Field, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { isPartFitValid, partFitIds, type PartFit } from '@/lib/part-fit'
+import { MutationBusy, SubmitButton } from '@/components/mutation-ui'
+import { FormFieldSkeleton } from '@/components/query-skeletons'
 import {
   getApiErrorMessage,
   useCategoriesQuery,
@@ -103,7 +104,8 @@ export function CreatePartForm() {
 
   return (
     <>
-      <form onSubmit={onSubmit} className="space-y-6">
+      <MutationBusy pending={mutation.isPending}>
+        <form onSubmit={onSubmit} className="space-y-6">
         <FieldGroup>
           <Field>
             <AdminFieldLabel htmlFor="part-name" required>
@@ -141,30 +143,42 @@ export function CreatePartForm() {
               onChange={(event) => setArticle(event.target.value)}
             />
           </Field>
-          <PartFitFields
-            fit={fit}
-            markId={markId}
-            modelId={modelId}
-            marks={marks}
-            models={models}
-            idPrefix="part"
-            onFitChange={setFit}
-            onMarkChange={setMarkId}
-            onModelChange={setModelId}
-          />
-          <Field>
-            <AdminFieldLabel htmlFor="part-category" required>
-              Категория
-            </AdminFieldLabel>
-            <EntitySelect
-              id="part-category"
-              items={categories}
-              value={categoryId}
-              onChange={setCategoryId}
-              onAdd={() => setCategoryModalOpen(true)}
-              placeholder="Выберите категорию"
+          {marksQuery.isPending || modelsQuery.isPending ? (
+            <>
+              <FormFieldSkeleton />
+              <FormFieldSkeleton />
+              <FormFieldSkeleton />
+            </>
+          ) : (
+            <PartFitFields
+              fit={fit}
+              markId={markId}
+              modelId={modelId}
+              marks={marks}
+              models={models}
+              idPrefix="part"
+              onFitChange={setFit}
+              onMarkChange={setMarkId}
+              onModelChange={setModelId}
             />
-          </Field>
+          )}
+          {categoriesQuery.isPending ? (
+            <FormFieldSkeleton />
+          ) : (
+            <Field>
+              <AdminFieldLabel htmlFor="part-category" required>
+                Категория
+              </AdminFieldLabel>
+              <EntitySelect
+                id="part-category"
+                items={categories}
+                value={categoryId}
+                onChange={setCategoryId}
+                onAdd={() => setCategoryModalOpen(true)}
+                placeholder="Выберите категорию"
+              />
+            </Field>
+          )}
           <Field>
             <AdminFieldLabel htmlFor="part-description">Описание</AdminFieldLabel>
             <Textarea
@@ -180,10 +194,11 @@ export function CreatePartForm() {
           </Field>
         </FieldGroup>
         {mutation.isError ? <FormError error={mutation.error} /> : null}
-        <Button type="submit" disabled={!valid || mutation.isPending}>
-          {mutation.isPending ? 'Сохраняем…' : 'Создать'}
-        </Button>
+        <SubmitButton type="submit" pending={mutation.isPending} pendingLabel="Создаём" disabled={!valid}>
+          Создать
+        </SubmitButton>
       </form>
+      </MutationBusy>
       <CreateCategoryModal
         open={categoryModalOpen}
         onOpenChange={setCategoryModalOpen}

@@ -1,5 +1,7 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { type FormEvent, useEffect, useState } from 'react'
+import { LoginSessionSkeleton } from '@/components/query-skeletons'
+import { MutationBusy, SubmitButton } from '@/components/mutation-ui'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { AdminFieldLabel } from '@/components/admin/AdminFieldLabel'
@@ -50,11 +52,7 @@ function AdminLoginPage() {
   }
 
   if (token && me.isPending) {
-    return (
-      <div className="mx-auto max-w-sm px-4 py-16">
-        <p className="text-sm text-muted-foreground">Проверяем сессию…</p>
-      </div>
-    )
+    return <LoginSessionSkeleton />
   }
 
   if (isAdmin) {
@@ -73,7 +71,8 @@ function AdminLoginPage() {
       <h1 className="text-3xl">Вход</h1>
       <p className="mt-3 text-sm text-muted-foreground">Только для администратора.</p>
 
-      <form className="mt-8" onSubmit={onSubmit}>
+      <MutationBusy pending={loginMutation.isPending} className="mt-8">
+      <form onSubmit={onSubmit}>
         <FieldGroup>
           <Field>
             <AdminFieldLabel htmlFor="admin-login" required>
@@ -120,10 +119,16 @@ function AdminLoginPage() {
           </Alert>
         ) : null}
 
-        <Button type="submit" className="mt-6 w-full" disabled={loginMutation.isPending}>
-          {loginMutation.isPending ? 'Входим…' : 'Войти'}
-        </Button>
+        <SubmitButton
+          type="submit"
+          className="mt-6 w-full"
+          pending={loginMutation.isPending}
+          pendingLabel="Входим"
+        >
+          Войти
+        </SubmitButton>
       </form>
+      </MutationBusy>
 
       <Button className="mt-6" variant="ghost" asChild>
         <Link to="/">На витрину</Link>

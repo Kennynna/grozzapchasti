@@ -5,6 +5,7 @@ import { FormError } from '@/components/admin/FormError'
 import { ImageField } from '@/components/admin/ImageField'
 import { PartFitFields } from '@/components/admin/PartFitFields'
 import { isTextDirty, optionalText } from '@/components/admin/form-utils'
+import { MutationBusy, SubmitButton } from '@/components/mutation-ui'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -18,6 +19,7 @@ import { Field, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { isPartFitValid, partFitFromIds, partFitIds } from '@/lib/part-fit'
+import { FormFieldSkeleton } from '@/components/query-skeletons'
 import {
   imageFilename,
   useCategoriesQuery,
@@ -131,6 +133,7 @@ function EditPartForm({ part, onDone }: { part: SparePart; onDone: () => void })
 
   return (
     <>
+      <MutationBusy pending={mutation.isPending || deleteImage.isPending}>
       <form onSubmit={onSubmit} className="space-y-6">
         <FieldGroup>
           <Field>
@@ -169,30 +172,42 @@ function EditPartForm({ part, onDone }: { part: SparePart; onDone: () => void })
               onChange={(event) => setArticle(event.target.value)}
             />
           </Field>
-          <PartFitFields
-            fit={fit}
-            markId={markId}
-            modelId={modelId}
-            marks={marks}
-            models={models}
-            idPrefix="edit-part"
-            onFitChange={setFit}
-            onMarkChange={setMarkId}
-            onModelChange={setModelId}
-          />
-          <Field>
-            <AdminFieldLabel htmlFor="edit-part-category" required>
-              Категория
-            </AdminFieldLabel>
-            <EntitySelect
-              id="edit-part-category"
-              items={categories}
-              value={categoryId}
-              onChange={setCategoryId}
-              onAdd={() => setCategoryModalOpen(true)}
-              placeholder="Выберите категорию"
+          {marksQuery.isPending || modelsQuery.isPending ? (
+            <>
+              <FormFieldSkeleton />
+              <FormFieldSkeleton />
+              <FormFieldSkeleton />
+            </>
+          ) : (
+            <PartFitFields
+              fit={fit}
+              markId={markId}
+              modelId={modelId}
+              marks={marks}
+              models={models}
+              idPrefix="edit-part"
+              onFitChange={setFit}
+              onMarkChange={setMarkId}
+              onModelChange={setModelId}
             />
-          </Field>
+          )}
+          {categoriesQuery.isPending ? (
+            <FormFieldSkeleton />
+          ) : (
+            <Field>
+              <AdminFieldLabel htmlFor="edit-part-category" required>
+                Категория
+              </AdminFieldLabel>
+              <EntitySelect
+                id="edit-part-category"
+                items={categories}
+                value={categoryId}
+                onChange={setCategoryId}
+                onAdd={() => setCategoryModalOpen(true)}
+                placeholder="Выберите категорию"
+              />
+            </Field>
+          )}
           <Field>
             <AdminFieldLabel htmlFor="edit-part-description">Описание</AdminFieldLabel>
             <Textarea
@@ -227,14 +242,20 @@ function EditPartForm({ part, onDone }: { part: SparePart; onDone: () => void })
         </FieldGroup>
         {mutation.isError ? <FormError error={mutation.error} /> : null}
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onDone}>
+          <Button type="button" variant="outline" disabled={mutation.isPending} onClick={onDone}>
             Отмена
           </Button>
-          <Button type="submit" disabled={!valid || !dirty || mutation.isPending}>
-            {mutation.isPending ? 'Сохраняем…' : 'Сохранить'}
-          </Button>
+          <SubmitButton
+            type="submit"
+            pending={mutation.isPending}
+            pendingLabel="Сохраняем"
+            disabled={!valid || !dirty}
+          >
+            Сохранить
+          </SubmitButton>
         </div>
       </form>
+      </MutationBusy>
       <CreateCategoryModal
         open={categoryModalOpen}
         onOpenChange={setCategoryModalOpen}

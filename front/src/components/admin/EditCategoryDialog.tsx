@@ -2,6 +2,7 @@ import { type FormEvent, useState } from 'react'
 import { toast } from 'sonner'
 import { FormError } from '@/components/admin/FormError'
 import { isTextDirty } from '@/components/admin/form-utils'
+import { MutationBusy, SubmitButton } from '@/components/mutation-ui'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -84,6 +85,7 @@ function EditCategoryForm({
   }
 
   return (
+    <MutationBusy pending={mutation.isPending}>
     <form onSubmit={onSubmit} className="space-y-6">
       <FieldGroup>
         <Field>
@@ -110,13 +112,19 @@ function EditCategoryForm({
       </FieldGroup>
       {mutation.isError ? <FormError error={mutation.error} /> : null}
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onDone}>
+        <Button type="button" variant="outline" disabled={mutation.isPending} onClick={onDone}>
           Отмена
         </Button>
-        <Button type="submit" disabled={!valid || !dirty || mutation.isPending}>
-          {mutation.isPending ? 'Сохраняем…' : 'Сохранить'}
-        </Button>
+        <SubmitButton
+          type="submit"
+          pending={mutation.isPending}
+          pendingLabel="Сохраняем"
+          disabled={!valid || !dirty}
+        >
+          Сохранить
+        </SubmitButton>
       </div>
     </form>
+    </MutationBusy>
   )
 }

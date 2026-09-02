@@ -7,15 +7,14 @@ import {
   EditCategoryDialog,
 } from '@/components/admin/lazy-dialogs'
 import { QueryStatus } from '@/components/QueryStatus'
+import { CategoryChipsSkeleton } from '@/components/query-skeletons'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
 import { previewStrip } from '@/lib/catalog-strip'
 import { cn } from '@/lib/utils'
 import { useDeleteCategoryMutation, type Category } from '@/queries'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { AdminAddTile } from './AdminAddTile'
-import { HorizontalScroller } from './HorizontalScroller'
 import { ShowAllTile, StripOrWrap } from './ShowAll'
 
 type CategoryChipsProps = {
@@ -68,13 +67,7 @@ export function CategoryChips({
         query={query}
         isEmpty={(items) => items.length === 0 && !isAdmin}
         emptyMessage="Категорий пока нет"
-        skeleton={
-          <HorizontalScroller>
-            {Array.from({ length: 5 }, (_, index) => (
-              <Skeleton key={index} className="h-8 w-24 shrink-0 rounded-full" />
-            ))}
-          </HorizontalScroller>
-        }
+        skeleton={<CategoryChipsSkeleton />}
       >
         {(categories) => {
           const matched = needle

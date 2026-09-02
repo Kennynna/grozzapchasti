@@ -15,6 +15,7 @@ type SparePartCardProps = {
   isAdmin?: boolean
   onEdit?: () => void
   onDelete?: () => void
+  className?: string
 }
 
 export function SparePartCard({
@@ -23,6 +24,7 @@ export function SparePartCard({
   isAdmin = false,
   onEdit,
   onDelete,
+  className,
 }: SparePartCardProps) {
   const image = firstImageSrc(part.images)
   const favorite = useFavoritesStore((state) => state.ids.includes(part.id))
@@ -31,7 +33,12 @@ export function SparePartCard({
   const cartQuantity = useCartStore(selectCartQuantity(part.id))
 
   return (
-    <article className="flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card">
+    <article
+      className={cn(
+        'flex h-full min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card',
+        className,
+      )}
+    >
       <div className="relative">
         <Link
           to="/parts/$partId"

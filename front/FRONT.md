@@ -20,7 +20,7 @@
   - Ключи доменные: `marksKeys` / `modelsKeys` / `categoriesKeys` / `sparePartsKeys` / `authKeys`
   - queryFn рядом с хуками в том же файле (`marks.ts`, `models.ts`, …)
   - update / delete / удаление фото — optimistic + rollback; create — `invalidateQueries` списков
-  - UI-состояния: `src/queries/status.ts` + `src/components/QueryStatus.tsx` (loading, error, empty, background-refetch, stale)
+  - UI-состояния: `src/queries/status.ts` + `src/components/QueryStatus.tsx` (loading, error, empty, background-refetch, stale). У `QueryStatus` скелетон обязателен. Заготовки — `src/components/query-skeletons.tsx`. Пока loader роута ждёт запрос, тот же скелетон в `pendingComponent` (`pendingMs: 0`), иначе пустой main. Мутации (создание / сохранение / удаление / логин): `src/components/mutation-ui.tsx` — оверлей со спиннером + `SubmitButton`.
   - `src/queries/http.ts` — fetch, JWT, `ApiError` из `{ statusCode, message, details? }`
   - `src/queries/auth-token.ts` — JWT в `sessionStorage`; 401 и `logout()` сбрасывают кэш `auth`
 - [x] Корзина и избранное (сторы)
@@ -93,7 +93,7 @@
 
 ### Страница запчасти
 
-`/parts/$partId`: галерея до 3 фото, хлебные крошки-ссылки в каталог (`/?markId=&modelId=#catalog`), описание, копирование артикула, в корзину (`+` / галочка) / избранное / скопировать заказ + открыть Telegram. Ниже — «Возможно, вам понадобится» (до 6 карточек). Нет записи → `notFound`.
+`/parts/$partId`: галерея до 3 фото, хлебные крошки-ссылки в каталог (`/?markId=&modelId=#catalog`), описание, копирование артикула, в корзину (`+` / галочка) / избранное / скопировать заказ + открыть Telegram. Ниже — «Возможно, вам понадобится»: горизонтальная лента с зацикленным скроллом (`SuggestedPartsStrip`). Нет записи → `notFound`.
 
 Карточки марки / модели / категории проще: фото или имя, выбранное состояние, тот же кебаб у админа. У категории фото нет — только имя.
 
@@ -241,7 +241,7 @@ front/src/
    - `src/components/ui/button.tsx` — hover CTA на `--primary-hover` (`#C7A17A`)
 2. [x] TanStack Router + layout (шапка/подвал/мобиле) + пустые страницы.
    - `vite.config.ts` — `@tanstack/router-plugin` **перед** React-плагином
-   - `src/main.tsx` — `RouterProvider` вместо `App.tsx` (файл удалён)
+   - `src/main.tsx` — `RouterProvider` вместо `App.tsx` (файл удалён); `defaultPendingMs: 0` и запасной скелетон, пока loader роута без своего `pendingComponent`
    - `src/routes/` — file-based роуты из карты выше; `admin.new.tsx` редиректит без JWT
    - `src/routeTree.gen.ts` — генерирует плагин, не править руками
    - `src/components/layout/Header.tsx` — лого, Каталог/Контакты, избранное, корзина, burger
@@ -249,12 +249,12 @@ front/src/
    - `src/queries/auth.ts` — `useIsAdmin()` = JWT + `useMeQuery` ok
    - Главная пока рендерит старые `Marks.root` / `Models.root` / `Zapchasti.root` — заменить на шаге 3
 3. [x] Главная на API: ленты, фильтры в search-params, сетка, пустые состояния.
-   - `src/routes/index.tsx` — `validateSearch` (`markId`, `modelId`, `categoryId`, `page`); `#catalog` — `min-h-[calc(100svh-4rem)]` под sticky-шапку `h-16`
+   - `src/routes/index.tsx` — `validateSearch` (`markId`, `modelId`, `categoryId`, `page`); `#catalog` — `min-h-[calc(100svh-4rem)]` под sticky-шапку `h-16`; `pendingMs: 0` + `HomePending` (hero + `CatalogPending`) пока loader качает списки
    - `src/components/home/HomeHero.tsx` — hero главной: схема диска, техническая сетка, три подписи из `site.heroHighlights`
    - `src/lib/catalog-search.ts` — парсинг URL (марка / модель / категория / `page`); `CATALOG_PAGE_SIZE = 14`
    - `src/stores/catalog.ts` — persist выбранных марки / модели / категории
    - `src/lib/format.ts` — `formatPrice`, `filterSpareParts` (И на клиенте), `catalogPartsForView` (точная модель + «Возможно, вам понадобится»)
-   - `src/components/catalog/` — `Catalog`, ленты марок/моделей, чипы категорий
+   - `src/components/catalog/` — `Catalog`, ленты марок/моделей, чипы категорий; `CatalogPending` — скелетоны лент/сетки под выбранные `markId`/`modelId`; подсказки «Выберите марку/модель» не показываем, пока их query `isPending`
    - пустая сетка: `CatalogEmpty.tsx` — «По вашему запросу ничего не найдено», сброс фильтров + Telegram; показывается и когда есть блок «Возможно, вам понадобится»
    - категории: чип «Все» первым (`CategoryChips`); инпут «Найти категорию» фильтрует чипы по имени; без `categoryId` — все товары марки/модели
    - ленты марок / моделей / категорий: подсказка «Выберите марку / модель / категорию»; если больше 10, в конце карточка «Показать все» (`ShowAll.tsx`, лимит в `lib/catalog-strip.ts`); клик раскрывает полный список с `flex-wrap`, «Свернуть» у заголовка
@@ -265,34 +265,34 @@ front/src/
 4. [x] Карточки: избранное, корзина, адаптив.
    - `src/components/catalog/SparePartCard.tsx` — фото, имя, марка (джойн списка), артикул если есть, цена бронзой, heart/`+`/галочка (`stopPropagation`); на мобиле компактная под 2 колонки
    - иконка корзины: `Plus` если товара нет, `Check` если уже в корзине (бейдж количества убран)
-   - `src/components/catalog/SparePartsGrid.tsx` — 2 / 2 / 3 колонки (`lg` 1024); при выбранном авто после сетки — «Возможно, вам понадобится»
+   - `src/components/catalog/SparePartsGrid.tsx` — 2 / 2 / 3 колонки (`lg` 1024); «Возможно, вам понадобится» — бесконечная горизонтальная лента (`SuggestedPartsStrip`)
    - слайдер цены убран (шаг 11)
 5. [x] `/cart` + sheet избранного. «Оформить» = скопировать текст + открыть Telegram, оплаты нет.
    - `src/config/site.ts` — `telegram` (`kennynna` для теста), `orderMessageIntro`
    - `src/lib/order-message.ts` — текст заказа, `telegramChatHref` без `?text=`
    - `src/components/cart/TelegramOrderActions.tsx` — «Скопировать текст» (галочка после клика) + иконка `target=_blank` на `t.me/<username>`
-   - `src/components/cart/CartView.tsx` — qty / убрать / очистить / TelegramOrderActions; снятый товар — «больше недоступен»
+   - `src/components/cart/CartView.tsx` — qty / убрать / очистить / TelegramOrderActions; снятый товар — «больше недоступен»; скелетон строк — `CartLinesSkeleton`
    - `src/routes/cart.tsx` — страница корзины
-   - `src/components/layout/FavoritesSheet.tsx` — sheet из шапки: список, в корзину, убрать
+   - `src/components/layout/FavoritesSheet.tsx` — sheet из шапки: список, в корзину, убрать; скелетон — `FavoritesLinesSkeleton`
 6. [x] `/contacts` из `site.ts` (якоря Доставка/Гарантия/О компании + копирайт).
    - `src/config/site.ts` — `sections`, `footerNav`
    - `src/routes/contacts.tsx` — контакты + якоря `#delivery` `#warranty` `#about` + ссылка Telegram
    - `src/components/layout/Footer.tsx` — ссылки на якоря, копирайт, Telegram
 7. [x] `/admin/login` + `isAdmin` в UI (плюсы; кебаб — шаг 8; индикатор в шапке уже есть).
-   - `src/routes/admin.login.tsx` — форма логина, 401/ошибка API, редирект на `/` если уже админ
+   - `src/routes/admin.login.tsx` — форма логина, 401/ошибка API, редирект на `/` если уже админ; пока `me` pending — `LoginSessionSkeleton`; пока `login` pending — `MutationBusy` + `SubmitButton`
    - `src/components/catalog/AdminAddTile.tsx` — `+` только при пропе `isAdmin` (с шага 10), `stopPropagation`
    - ленты/сетка — плюс → `/admin/new/mark|model|category|part` (формы — шаг 9)
 8. [x] Кебаб, модалка редактирования (dirty), удаление.
    - `src/components/admin/AdminKebab.tsx` — только при пропе `isAdmin` (с шага 10), `stopPropagation`
-   - `EditMarkDialog` / `EditModelDialog` / `EditCategoryDialog` / `EditPartDialog` — те же поля, «Сохранить» disabled пока нет dirty или форма невалидна
-   - `ImageField` — существующие фото + `DELETE .../images/:filename`, новые файлы = dirty
-   - `ConfirmDeleteDialog` — марка/модель: каскад; категория: 409 показываем `message`
+   - `EditMarkDialog` / `EditModelDialog` / `EditCategoryDialog` / `EditPartDialog` — те же поля, «Сохранить» disabled пока нет dirty или форма невалидна; pending — `MutationBusy` + `SubmitButton` («Сохраняем»)
+   - `ImageField` — существующие фото + `DELETE .../images/:filename`, новые файлы = dirty; пока фото удаляется — спиннер на превью
+   - `ConfirmDeleteDialog` — марка/модель: каскад; категория: 409 показываем `message`; pending — оверлей, «Удаляем», диалог не закрыть
    - кебаб на `MarksStrip` / `ModelsStrip` / `CategoryChips` / `SparePartCard`
 9. [x] Страницы `/admin/new/*`, селект «Добавить…» + вложенные модалки, фото.
    - `src/components/admin/ImageField.tsx` — до 3, jpeg/png/webp/gif, ≤ 10 МБ
    - `src/components/admin/EntitySelect.tsx` — первая опция «Добавить…» открывает модалку
-   - `CreateMarkForm` / `CreateModelForm` / `CreateCategoryForm` / `CreatePartForm` (+ модалки)
-   - применимость запчасти: эта модель / вся марка / все авто (`PartFitFields`); модель только от выбранной марки
+   - `CreateMarkForm` / `CreateModelForm` / `CreateCategoryForm` / `CreatePartForm` (+ модалки); pending — `MutationBusy` + `SubmitButton` («Создаём»)
+   - применимость запчасти: эта модель / вся марка / все авто (`PartFitFields`); модель только от выбранной марки; пока списки марок/моделей/категорий `isPending` — `FormFieldSkeleton` вместо селектов (create/edit)
    - после успеха на странице запчасти — тост «Запчасть успешно добавлена», форма сбрасывается, без редиректа; ошибка — `message` с бэка, поля не трогаем, можно повторить. Марка/модель/категория — тост и переход на `/`. Из модалки — закрыть и подставить новый id
    - `AdminFieldLabel` — у поля «обязательно» (бронза) или «необязательно» (серый); create и edit
 10. [x] Оптимизация витрины. `React.memo` не трогать — Compiler уже в Vite.
@@ -308,7 +308,7 @@ front/src/
     - `Catalog` пишет и URL, и стор в `patchCatalog`. `PriceFilter.tsx` удалён, `priceMin`/`priceMax` из URL убраны
 12. [x] Поиск по имени и артикулу — **снят**. Поля нет, `q` из URL убран. `CatalogSearchField.tsx` удалён. Сетка только при марке и модели.
 13. [x] Страница запчасти + галерея.
-    - `src/routes/parts.$partId.tsx` — `/parts/$partId`, loader `sparePartsQueries.detail`, 404 → `notFound`
+    - `src/routes/parts.$partId.tsx` — `/parts/$partId`, loader `sparePartsQueries.detail`, 404 → `notFound`; `pendingMs: 0` + `PartPagePending` (`ProductPageSkeleton`)
     - `src/components/catalog/ImageGallery.tsx` — до 3 фото, стрелки и превью
     - Карточка/корзина/избранное ведут на страницу. Артикул копируется. Telegram — `TelegramOrderActions`
     - На карточке `+` / галочка вместо сумки с бейджем (`SparePartCard`)
@@ -329,9 +329,12 @@ front/src/
     - `src/components/catalog/SparePartsGrid.tsx` — проп `models`, подпись применимости с моделью
     - `src/routes/parts.$partId.tsx` — `Plus`/`Check` как на карточке; крошки-`Link` в `/?markId=&modelId=#catalog`; `relatedPartsFor` (до 6)
     - `src/lib/format.ts` — `relatedPartsFor` (точное авто + универсальные / марка / категория)
+    - «Возможно, вам понадобится» на главной и на `/parts/$partId` — `SuggestedPartsStrip` (зацикленный горизонтальный скролл)
     - `src/components/layout/FavoritesSheet.tsx` — клик по товару закрывает sheet
     - `src/routes/__root.tsx` — `errorComponent` в том же Shell (шапка/подвал)
     - пагинация основной сетки: 14 шт., `page` в URL, `CatalogPagination.tsx`; смена фильтров сбрасывает страницу
+    - скелетоны запросов: `src/components/query-skeletons.tsx`; `QueryStatus` без скелетона не собрать. Главная и `/parts/$partId` — ещё `pendingComponent`, пока loader ждёт API. Корзина, избранное, логин, селекты админки — те же заготовки.
+    - лоадеры мутаций: `src/components/mutation-ui.tsx` (`MutationBusy`, `SubmitButton`, `Spinner`). Создание / сохранение / удаление / логин / удаление фото.
 
 ## Дырки бэка
 

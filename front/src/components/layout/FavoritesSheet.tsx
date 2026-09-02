@@ -3,6 +3,7 @@ import { Check, Heart, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { QueryStatus } from '@/components/QueryStatus'
 import { CardImage } from '@/components/catalog/CardImage'
+import { FavoritesLinesSkeleton } from '@/components/query-skeletons'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -12,7 +13,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Skeleton } from '@/components/ui/skeleton'
 import { formatPrice } from '@/lib/format'
 import { firstImageSrc, useSparePartsQuery, type SparePart } from '@/queries'
 import { useCartStore, useFavoritesStore } from '@/stores'
@@ -150,13 +150,7 @@ export function FavoritesSheet({ open, onOpenChange }: FavoritesSheetProps) {
           <div className="min-h-0 flex-1 overflow-y-auto px-4">
             <QueryStatus
               query={partsQuery}
-              skeleton={
-                <div className="space-y-3">
-                  {Array.from({ length: 3 }, (_, index) => (
-                    <Skeleton key={index} className="h-16 rounded-md" />
-                  ))}
-                </div>
-              }
+              skeleton={<FavoritesLinesSkeleton />}
             >
               {(parts) => (
                 <FavoritesList ids={ids} parts={parts} onOpenChange={onOpenChange} />
