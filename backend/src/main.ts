@@ -2,20 +2,30 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import 'dotenv/config';
+import helmet from 'helmet';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import {
   flattenValidationErrors,
   hasMissingFields,
 } from './common/validation/flatten-errors';
+import { assertRuntimeEnv } from './config/secrets';
 
 async function bootstrap() {
+  assertRuntimeEnv();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.set('trust proxy', 1);
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
 
+  const origin = process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173';
   app.setGlobalPrefix('api');
   app.enableCors({
-    origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173',
-    credentials: true,
+    origin,
+    credentials: false,
   });
   app.useGlobalPipes(
     new ValidationPipe({

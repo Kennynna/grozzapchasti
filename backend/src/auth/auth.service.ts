@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { db } from '../prisma/db';
+import { assertAdminPassword } from '../config/secrets';
 import { BCRYPT_ROUNDS } from './auth.constants';
 import { LoginDto } from './dto/login.dto';
 
@@ -32,11 +33,12 @@ export class AuthService implements OnModuleInit {
       return;
     }
 
-    const login = this.config.get<string>('ADMIN_LOGIN') ?? 'admin';
+    const login = this.config.get<string>('ADMIN_LOGIN')?.trim();
     const password = this.config.get<string>('ADMIN_PASSWORD');
-    if (!password) {
-      throw new Error('ADMIN_PASSWORD не задан — нечем создать администратора');
+    if (!login || !password) {
+      throw new Error('ADMIN_LOGIN и ADMIN_PASSWORD не заданы — нечем создать администратора');
     }
+    assertAdminPassword(password);
 
     await db.orm.public.Admin.create({
       login,

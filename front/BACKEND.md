@@ -12,13 +12,13 @@
 
 Один админ, пользователей нет.
 
-Локально: `admin` / `admin`.
+Логин и пароль — из `backend/.env` (`ADMIN_LOGIN` / `ADMIN_PASSWORD`). Не `admin` / `admin`: Chrome считает этот пароль утекшим. После смены пароля в env: `npm run db:set-admin`.
 
 ```
 POST /api/auth/login
-{ "login": "admin", "password": "admin" }
+{ "login": "<ADMIN_LOGIN>", "password": "<ADMIN_PASSWORD>" }
 
-→ { "accessToken": "<jwt>", "admin": { "id": 1, "login": "admin" } }
+→ { "accessToken": "<jwt>", "admin": { "id": 1, "login": "<ADMIN_LOGIN>" } }
 ```
 
 Все `POST` / `PATCH` / `DELETE` (кроме логина):
@@ -169,7 +169,7 @@ Query у списка (`?markId=&modelId=&categoryId=`) на бэке есть, 
 POST /api/auth/login
 Content-Type: application/json
 
-{"login":"admin","password":"admin"}
+{"login":"<ADMIN_LOGIN>","password":"<ADMIN_PASSWORD>"}
 ```
 
 Создать запчасть с фото:

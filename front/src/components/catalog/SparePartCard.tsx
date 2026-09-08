@@ -98,12 +98,15 @@ export function SparePartCard({
         <h3 className="line-clamp-2 min-h-10 font-heading text-sm font-semibold leading-snug md:min-h-12 md:text-base">
           {part.name}
         </h3>
-        {markName ? (
-          <p className="truncate text-xs text-muted-foreground md:text-sm">{markName}</p>
-        ) : null}
-        {part.article ? (
-          <p className="truncate text-[11px] text-muted-foreground md:text-xs">{part.article}</p>
-        ) : null}
+        <p className="h-4 truncate text-xs leading-4 text-muted-foreground md:h-5 md:text-sm md:leading-5">
+          {markName ?? '\u00A0'}
+        </p>
+        <p
+          className="h-4 truncate text-[11px] leading-4 text-muted-foreground md:text-xs"
+          aria-hidden={!part.article}
+        >
+          {part.article ?? '\u00A0'}
+        </p>
         <p className="mt-auto pt-2 text-base font-medium text-primary md:pt-3 md:text-lg">
           {formatPrice(part.price)}
         </p>

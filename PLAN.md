@@ -20,7 +20,7 @@
 7. **Фильтрация каталога — на фронте.** Бэк отдаёт списки целиком (`GET /api/marks`, `/models`, `/categories`, `/spare-parts`). Витрина сама сужает выдачу. Не дергать бэк на каждый клик по категории или ползунку цены. Query-параметры на `GET /api/spare-parts` для витрины не используем.
 8. **UI: shadcn/ui** (Radix + Nova, Tailwind v4). Компоненты лежат в `front/src/components/ui/`. Новые UI-элементы брать оттуда (`pnpm dlx shadcn@latest add <name>`), не ставить другую библиотеку.
 9. **Роутер: TanStack Router**, не React Router. Корзина и избранное — zustand persist (`localStorage`). JWT админа — `sessionStorage`.
-10. **Тема витрины** — `front/design.md` (тёмный графит + бронза, шрифт Manrope). Светлую тему не делаем.
+10. **Тема витрины** — `front/design.md` (светлая бумага + бронза, шрифт Manrope). Тёмную тему не делаем.
 11. **Покупателей, заказов и оплаты нет.** Корзина не уходит на бэк. «Оформить» — скопировать текст заказа и открыть `t.me/<username>` в новой вкладке. Подробности — `front/FRONT.md` § «Оформить → Telegram».
 
 ## Модель данных
@@ -92,16 +92,14 @@ SparePart    name, article? (unique если задан), description, images[],
 
 ```
 DATABASE_URL=postgresql://zapchasti:zapzhasti123@localhost:5432/grozzapchastiDB
-JWT_SECRET=...
+JWT_SECRET=...   # openssl rand -base64 48
 ADMIN_LOGIN=admin
-ADMIN_PASSWORD=admin
+ADMIN_PASSWORD=...   # свой, не admin: Chrome иначе пишет про утечку
 FRONTEND_ORIGIN=http://localhost:5173
 PORT=4060
 ```
 
-Локальный пароль `admin` только для разработки. Перед продом сменить `JWT_SECRET` и пароль.
-
-Админ сидится при старте бэка, если таблица пустая. Смена `ADMIN_PASSWORD` в env существующий хеш сама не обновит.
+Пароль `admin` нельзя: он в известных утечках, браузер предупреждает. Не короче 10 символов. Смена в `.env` существующий хеш сама не обновит — `npm run db:set-admin`.
 
 ## Как гонять локально
 
@@ -116,6 +114,9 @@ npm run db:seed
 
 # бэк
 npm run start:dev   # :4060
+
+# если сменили ADMIN_PASSWORD в .env
+npm run db:set-admin
 
 # фронт
 cd front && pnpm dev   # :5173

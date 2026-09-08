@@ -9,10 +9,10 @@ const CY = 240
 export function HomeHero() {
   return (
     <section className="relative overflow-hidden border-b border-border">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_78%_42%,rgba(184,135,76,0.14),transparent_42%),radial-gradient(ellipse_at_12%_0%,rgba(229,195,161,0.05),transparent_36%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_78%_42%,rgba(184,135,76,0.12),transparent_42%),radial-gradient(ellipse_at_12%_0%,rgba(184,135,76,0.04),transparent_36%)]" />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.22] [background-image:linear-gradient(rgba(184,135,76,0.12)_1px,transparent_1px),linear-gradient(90deg,rgba(184,135,76,0.12)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_at_70%_45%,black_18%,transparent_72%)]"
+        className="pointer-events-none absolute inset-0 opacity-[0.14] [background-image:linear-gradient(rgba(184,135,76,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(184,135,76,0.18)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_at_70%_45%,black_18%,transparent_72%)]"
       />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:py-24 lg:py-28">
@@ -75,7 +75,7 @@ function HeroRotor() {
           <radialGradient id={glow} cx="38%" cy="30%" r="62%">
             <stop offset="0%" stopColor="#C7A17A" stopOpacity="0.22" />
             <stop offset="55%" stopColor="#B8874C" stopOpacity="0.06" />
-            <stop offset="100%" stopColor="#0B0B0B" stopOpacity="0" />
+            <stop offset="100%" stopColor="#F7F4EF" stopOpacity="0" />
           </radialGradient>
           <radialGradient id={face} cx="36%" cy="28%" r="68%">
             <stop offset="0%" stopColor="#3A3A40" />

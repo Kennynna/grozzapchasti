@@ -19,7 +19,10 @@ import {
 
 export const Route = createFileRoute('/admin/login')({
   head: () => ({
-    meta: [{ title: `Вход · ${site.name}` }],
+    meta: [
+      { title: `Вход · ${site.name}` },
+      { name: 'robots', content: 'noindex, nofollow' },
+    ],
   }),
   component: AdminLoginPage,
 })

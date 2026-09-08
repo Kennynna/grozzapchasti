@@ -11,7 +11,7 @@ export class LoginDto {
 
   @IsString({ message: 'Пароль должен быть строкой' })
   @IsNotEmpty({ message: 'Пароль обязателен' })
-  @MinLength(4, { message: 'Пароль слишком короткий' })
+  @MinLength(3, { message: 'Пароль слишком короткий' })
   @MaxLength(200, { message: 'Пароль не длиннее 200 символов' })
   password: string;
 }

@@ -93,7 +93,7 @@ export function SuggestedPartsStrip({
     <div
       ref={scrollerRef}
       className={cn(
-        'flex gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+        'flex items-stretch gap-3 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
         className,
       )}
       onPointerEnter={() => {
@@ -109,7 +109,7 @@ export function SuggestedPartsStrip({
           part={part}
           markName={markLabel(part)}
           isAdmin={isAdmin}
-          className="w-48 shrink-0 md:w-56"
+          className="h-full w-48 shrink-0 self-stretch md:w-56"
           onEdit={onEdit ? () => onEdit(part.id) : undefined}
           onDelete={onDelete ? () => onDelete(part) : undefined}
         />

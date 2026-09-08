@@ -42,11 +42,11 @@
 
 1. **Роутер: TanStack Router** (file-based). Уже есть TanStack Query — тот же стек, типизированные URL и search-params для фильтров каталога. Не React Router.
 2. **Корзина / избранное: zustand + persist.** Сторы: `src/stores/cart.ts`, `src/stores/favorites.ts`. JWT админа — `sessionStorage` (`queries/auth-token.ts`), не localStorage.
-3. **Тема: тёмная всегда.** Палитра и Manrope — `design.md`. Не светлая тема, не `prefers-color-scheme`.
+3. **Тема: светлая всегда.** Палитра и Manrope — `design.md`. Не тёмная тема, не `prefers-color-scheme`, тумблера нет.
 4. **Фильтры каталога на клиенте.** На `/` источник правды — search-params: `markId`, `modelId`, `categoryId`, `page`. Persist (`src/stores/catalog.ts`) хранит марку / модель / категорию, чтобы вернуться с `/cart` без query. Пустой URL после гидрации один раз заполняется из стора. Смена марки сбрасывает модель. Смена фильтров сбрасывает `page`. Поиска по тексту и фильтра по цене нет. Сетка запчастей — по 14 на страницу.
 5. **Админские кнопки только UI.** Мутации всё равно с JWT; без токена бэк ответит 401.
 6. **Моки в `config/constants.ts` удалить**, данные только с API (`src/queries/`).
-7. **Артикул на карточке** — `SparePart.article: string | null`. При создании необязателен. Если есть — показываем, если `null` — блок артикула не рендерим. Unique, если задан.
+7. **Артикул на карточке** — `SparePart.article: string | null`. При создании необязателен. Unique, если задан. На карточке слот под артикул и марку всегда одной высоты: без артикула строка пустая, карточки не прыгают.
 8. **Оплаты нет.** Кнопка в корзине не принимает карту и не шлёт заказ на бэк. «Скопировать текст» + ссылка `t.me/<username>` в новой вкладке (`target=_blank`). Username — в `src/config/site.ts`.
 9. **Оптимизация без `React.memo`.** В `vite.config.ts` уже React Compiler (`babel-plugin-react-compiler`). Карточки и ленты в `memo` / `useCallback` «на всякий случай» не оборачивать. Сначала картинки, кэш списков, сплит админки — шаг 10.
 
@@ -174,22 +174,22 @@
 
 | роль | hex | css-var |
 |---|---|---|
-| фон | `#0B0B0B` | `--background` |
-| вторичный фон | `#121214` | `--secondary` / sidebar |
-| карточка | `#1A1A1D` | `--card` |
-| hover | `#2A2A2E` | `--accent` / `--muted` |
+| фон | `#F7F4EF` | `--background` |
+| вторичный фон | `#EFEAE3` | `--secondary` / sidebar |
+| карточка | `#FFFFFF` | `--card` |
+| hover | `#E8E2D8` | `--accent` / `--muted` |
 | бронза CTA/цена | `#B8874C` | `--primary` |
-| светлая бронза | `#C7A17A` | hover primary |
-| редкий акцент | `#E5C3A1` | линии / иконки |
-| текст | `#F5F5F5` | `--foreground` |
-| вторичный текст | `#A1A1A8` | `--muted-foreground` |
-| граница | `#292929` | `--border` |
+| hover бронзы | `#A07340` | `--primary-hover` |
+| иконки / акцент | `#8F6A3A` | `--highlight` |
+| текст | `#1A1714` | `--foreground` |
+| вторичный текст | `#6B645C` | `--muted-foreground` |
+| граница | `#D9D2C8` | `--border` |
 
 Шрифт **Manrope** (кириллица). Заголовки 600–700, кнопки/цены 500–600, текст 400–500. Geist убрать.
 
 Бронза только на CTA, цене, active, мелких иконках. Радиус сдержанный (`--radius` меньше дефолтного shadcn). Карточки: тонкая граница, много воздуха, фото доминирует.
 
-`ThemeProvider`: `defaultTheme="dark"`, `forcedTheme="dark"`.
+`ThemeProvider`: `defaultTheme="light"`, `forcedTheme="light"`.
 
 ## Адаптив
 
@@ -234,11 +234,11 @@ front/src/
 
 ## Шаги (идти по порядку)
 
-1. [x] Тема: CSS-токены + Manrope + `forcedTheme="dark"`.
-   - `src/index.css` — палитра из таблицы ниже, `--radius: 0.375rem`, Geist убран, `@fontsource-variable/manrope` (`Manrope Variable`)
-   - `src/main.tsx` — `ThemeProvider` с `defaultTheme="dark"` и `forcedTheme="dark"`
-   - `index.html` — `lang="ru"`, `class="dark"` на `<html>`, title `Groz Zapchasti`
-   - `src/components/ui/button.tsx` — hover CTA на `--primary-hover` (`#C7A17A`)
+1. [x] Тема: CSS-токены + Manrope + `forcedTheme="light"`.
+   - `src/index.css` — светлая палитра из таблицы ниже, `--radius: 0.375rem`, Geist убран, `@fontsource-variable/manrope` (`Manrope Variable`)
+   - `src/main.tsx` — `ThemeProvider` с `defaultTheme="light"` и `forcedTheme="light"`
+   - `index.html` — `lang="ru"`, без `class="dark"`, title `Groz Zapchasti`
+   - `src/components/ui/button.tsx` — hover CTA на `--primary-hover`
 2. [x] TanStack Router + layout (шапка/подвал/мобиле) + пустые страницы.
    - `vite.config.ts` — `@tanstack/router-plugin` **перед** React-плагином
    - `src/main.tsx` — `RouterProvider` вместо `App.tsx` (файл удалён); `defaultPendingMs: 0` и запасной скелетон, пока loader роута без своего `pendingComponent`
@@ -263,7 +263,7 @@ front/src/
    - `src/config/constants.ts` — моки удалены, остался `API_URL`
    - старые `Marks.root` / `Models.root` / `Zapchasti.root` удалены
 4. [x] Карточки: избранное, корзина, адаптив.
-   - `src/components/catalog/SparePartCard.tsx` — фото, имя, марка (джойн списка), артикул если есть, цена бронзой, heart/`+`/галочка (`stopPropagation`); на мобиле компактная под 2 колонки
+   - `src/components/catalog/SparePartCard.tsx` — фото, имя (2 строки min-h), слоты марки и артикула фиксированной высоты, цена бронзой, heart/`+`/галочка (`stopPropagation`); на мобиле компактная под 2 колонки
    - иконка корзины: `Plus` если товара нет, `Check` если уже в корзине (бейдж количества убран)
    - `src/components/catalog/SparePartsGrid.tsx` — 2 / 2 / 3 колонки (`lg` 1024); «Возможно, вам понадобится» — бесконечная горизонтальная лента (`SuggestedPartsStrip`)
    - слайдер цены убран (шаг 11)
@@ -279,7 +279,8 @@ front/src/
    - `src/routes/contacts.tsx` — контакты + якоря `#delivery` `#warranty` `#about` + ссылка Telegram
    - `src/components/layout/Footer.tsx` — ссылки на якоря, копирайт, Telegram
 7. [x] `/admin/login` + `isAdmin` в UI (плюсы; кебаб — шаг 8; индикатор в шапке уже есть).
-   - `src/routes/admin.login.tsx` — форма логина, 401/ошибка API, редирект на `/` если уже админ; пока `me` pending — `LoginSessionSkeleton`; пока `login` pending — `MutationBusy` + `SubmitButton`
+   - `src/routes/admin.login.tsx` — форма логина, 401/ошибка API, редирект на `/` если уже админ; пока `me` pending — `LoginSessionSkeleton`; пока `login` pending — `MutationBusy` + `SubmitButton`; `robots: noindex, nofollow`
+   - `public/robots.txt` — `Disallow: /admin`
    - `src/components/catalog/AdminAddTile.tsx` — `+` только при пропе `isAdmin` (с шага 10), `stopPropagation`
    - ленты/сетка — плюс → `/admin/new/mark|model|category|part` (формы — шаг 9)
 8. [x] Кебаб, модалка редактирования (dirty), удаление.
@@ -335,6 +336,7 @@ front/src/
     - пагинация основной сетки: 14 шт., `page` в URL, `CatalogPagination.tsx`; смена фильтров сбрасывает страницу
     - скелетоны запросов: `src/components/query-skeletons.tsx`; `QueryStatus` без скелетона не собрать. Главная и `/parts/$partId` — ещё `pendingComponent`, пока loader ждёт API. Корзина, избранное, логин, селекты админки — те же заготовки.
     - лоадеры мутаций: `src/components/mutation-ui.tsx` (`MutationBusy`, `SubmitButton`, `Spinner`). Создание / сохранение / удаление / логин / удаление фото.
+    - деплой: [`../DEPLOY.md`](../DEPLOY.md), шаблоны в `deploy/`. Пароль админа не `admin` (Chrome «утечка»). HTTPS обязателен.
 
 ## Дырки бэка
 

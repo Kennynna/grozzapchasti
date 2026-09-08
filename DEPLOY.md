@@ -1,6 +1,6 @@
 # Деплой grozzapchasti на Ubuntu
 
-Один сервер: Nginx раздаёт фронт и проксирует API, NestJS слушает localhost, Postgres в Docker.
+Один сервер: Nginx отдаёт фронт и проксирует API, NestJS слушает только localhost, Postgres в Docker.
 
 ```
 браузер
@@ -9,12 +9,14 @@
        /api       127.0.0.1:4060
        /uploads   127.0.0.1:4060
   → NestJS (systemd)
-  → Postgres (Docker, порт только на localhost)
+  → Postgres (Docker, порт только 127.0.0.1:5432)
 ```
 
-Фронт ходит на `/api` и `/uploads` с того же домена (`front/src/config/constants.ts`). Отдельный URL бэка не нужен.
+Фронт ходит на `/api` и `/uploads` с того же домена. Отдельный URL бэка не нужен.
 
-Подходит Ubuntu 22.04 / 24.04. Нужен домен, смотрящий на IP сервера (для HTTPS). Без домена можно на IP по HTTP — SSL тогда пропустить.
+Нужны Ubuntu 22.04 / 24.04 и **домен на IP сервера**. Без HTTPS админка в Chrome будет ругаться на пароль (форма «не защищена» + проверка утечек). На голый HTTP по IP не выкладывайте.
+
+Готовые файлы лежат в `deploy/`.
 
 ---
 
@@ -72,33 +74,20 @@ git clone <URL_РЕПО> /var/www/grozzapchasti
 cd /var/www/grozzapchasti
 ```
 
-Если репозиторий ещё не на сервере — скопируйте проект (`scp -r` / `rsync`).
-
 ---
 
 ## 3. Postgres
 
-В `backend/docker-compose.yml` Postgres торчит на `0.0.0.0:5432`. На проде привяжите только localhost.
+В `backend/docker-compose.yml` порт уже привязан к localhost (`127.0.0.1:5432`). Смените `POSTGRES_PASSWORD` в compose **до** первого запуска и продублируйте его в `DATABASE_URL`.
 
 ```bash
 cd /var/www/grozzapchasti/backend
-```
-
-В `docker-compose.yml` замените блок `ports:` на:
-
-```yaml
-    ports:
-      - '127.0.0.1:5432:5432'
-```
-
-Дальше:
-
-```bash
+nano docker-compose.yml   # POSTGRES_PASSWORD
 docker compose up -d
 docker compose ps
 ```
 
-Контейнер `grozzapchasti-postgres` должен быть `running`. Данные лежат в volume `postgres_data` — `docker compose down` их не удаляет. Стереть БД: `docker compose down -v` (необратимо).
+Контейнер `grozzapchasti-postgres` должен быть `running`. Данные в volume `postgres_data`. Стереть БД: `docker compose down -v` (необратимо).
 
 ---
 
@@ -110,33 +99,36 @@ cp .env.example .env
 nano .env
 ```
 
-Поставьте **свои** значения. Локальные `admin` / `admin` на прод не оставлять.
-
 ```env
-DATABASE_URL="postgresql://zapchasti:zapzhasti123@127.0.0.1:5432/grozzapchastiDB"
+DATABASE_URL="postgresql://zapchasti:СВОЙ_ПАРОЛЬ_POSTGRES@127.0.0.1:5432/grozzapchastiDB"
 PORT=4060
 FRONTEND_ORIGIN="https://ВАШ_ДОМЕН"
+NODE_ENV=production
 
-JWT_SECRET="вставьте-длинную-случайную-строку"
+JWT_SECRET="вставьте-вывод-openssl"
 ADMIN_LOGIN="ваш-логин"
 ADMIN_PASSWORD="ваш-сложный-пароль"
 ```
 
-Секрет:
+Секреты:
 
 ```bash
 openssl rand -base64 48
 ```
 
-Пароль Postgres в `DATABASE_URL` должен совпадать с `POSTGRES_PASSWORD` в compose. Если меняете — поменяйте в обоих местах **до** первого `docker compose up`.
+`ADMIN_PASSWORD` не короче 10 символов и **не** `admin` / `password` / `123456`. Иначе бэк не стартует (первый админ) или Chrome снова покажет «пароль найден в утечке».
 
-`FRONTEND_ORIGIN` — публичный URL сайта без слэша в конце: `https://zapchasti.example.com`.
+Админ в БД создаётся один раз, если таблица пустая. Потом правка `.env` хеш сама не меняет — после смены пароля:
 
-Админ создаётся **один раз** при старте бэка, если таблица `Admin` пустая. Потом смена `ADMIN_PASSWORD` в `.env` хеш в БД сама не обновит.
+```bash
+npm run db:set-admin
+```
+
+На проде `NODE_ENV=production`: JWT не шаблонный, `FRONTEND_ORIGIN` только `https://…` без `/` в конце.
 
 ### Схема и сборка
 
-dev-зависимости нужны: `prisma` и `@nestjs/cli` там, не в `dependencies`. На сервере ставьте полный `npm ci`.
+dev-зависимости нужны (`prisma`, `@nestjs/cli`). Ставьте полный `npm ci`.
 
 ```bash
 cd /var/www/grozzapchasti/backend
@@ -146,45 +138,19 @@ npx prisma db init
 npm run build
 ```
 
-Демо-каталог (BMW / Mercedes / Toyota) **не обязателен**. Сид **стирает** марки, модели, категории и запчасти:
+Демо-каталог (BMW / Mercedes / Toyota) не обязателен. Сид **стирает** марки, модели, категории и запчасти:
 
 ```bash
 # только если нужна тестовая витрина
 npm run db:seed
 ```
 
-Фото пишутся в `backend/uploads/` (это текущая директория процесса). Папка уже есть в репо (`.gitkeep`).
+Фото пишутся в `backend/uploads/`.
 
 ### systemd
 
 ```bash
-sudo nano /etc/systemd/system/grozzapchasti-api.service
-```
-
-```ini
-[Unit]
-Description=grozzapchasti API
-After=network.target docker.service
-Requires=docker.service
-
-[Service]
-Type=simple
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/grozzapchasti/backend
-Environment=NODE_ENV=production
-EnvironmentFile=/var/www/grozzapchasti/backend/.env
-ExecStart=/usr/bin/node dist/main
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Права: процесс должен читать код и писать фото.
-
-```bash
+sudo cp /var/www/grozzapchasti/deploy/grozzapchasti-api.service /etc/systemd/system/
 sudo chown -R www-data:www-data /var/www/grozzapchasti/backend
 sudo chmod 640 /var/www/grozzapchasti/backend/.env
 sudo chmod 750 /var/www/grozzapchasti/backend/uploads
@@ -196,10 +162,11 @@ sudo systemctl status grozzapchasti-api
 Проверка с сервера:
 
 ```bash
+curl -sS http://127.0.0.1:4060/api/health
 curl -sS http://127.0.0.1:4060/api/marks
 ```
 
-Должен прийти JSON-список (можно пустой `[]`). Логи: `journalctl -u grozzapchasti-api -f`.
+Первый должен вернуть `{"ok":true}`. Логи: `journalctl -u grozzapchasti-api -f`.
 
 ---
 
@@ -211,87 +178,48 @@ pnpm install --frozen-lockfile
 pnpm build
 ```
 
-Статика окажется в `/var/www/grozzapchasti/front/dist`. Nginx должен её читать:
+Статика в `/var/www/grozzapchasti/front/dist`. Nginx должен её читать:
 
 ```bash
 sudo chown -R "$USER":www-data /var/www/grozzapchasti/front/dist
 sudo chmod -R g+rX /var/www/grozzapchasti/front/dist
 ```
 
-`API_URL` уже `/api` — на проде ничего подставлять не нужно, если Nginx проксирует `/api` и `/uploads` на тот же хост.
+`API_URL` уже `/api` — ничего не подставлять, если Nginx проксирует `/api` и `/uploads`.
 
 ---
 
-## 6. Nginx
+## 6. Nginx и HTTPS
 
-Подставьте домен вместо `ВАШ_ДОМЕН`.
+Подставьте домен в `deploy/nginx.conf` (`server_name`).
 
 ```bash
+sudo cp /var/www/grozzapchasti/deploy/nginx.conf /etc/nginx/sites-available/grozzapchasti
 sudo nano /etc/nginx/sites-available/grozzapchasti
-```
-
-```nginx
-server {
-    listen 80;
-    listen [::]:80;
-    server_name ВАШ_ДОМЕН;
-
-    client_max_body_size 32m;
-
-    root /var/www/grozzapchasti/front/dist;
-    index index.html;
-
-    location /api/ {
-        proxy_pass http://127.0.0.1:4060;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location /uploads/ {
-        proxy_pass http://127.0.0.1:4060;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
-`try_files` нужен TanStack Router: `/cart`, `/contacts`, `/admin/login` — это клиентские маршруты, не файлы.
-
-```bash
 sudo ln -s /etc/nginx/sites-available/grozzapchasti /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-Откройте `http://ВАШ_ДОМЕН` — должна открыться витрина.
+`try_files` нужен TanStack Router: `/cart`, `/contacts`, `/admin/login` — клиентские маршруты.
 
-### HTTPS
-
-Когда домен уже резолвится на сервер:
+Когда домен резолвится на сервер:
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d ВАШ_ДОМЕН
 ```
 
-Certbot сам допишет 443 и редирект с HTTP. Продление: `sudo certbot renew --dry-run`.
+Certbot допишет 443 и редирект с HTTP. Продление: `sudo certbot renew --dry-run`.
 
-После выдачи сертификата в `backend/.env` должен быть `FRONTEND_ORIGIN="https://ВАШ_ДОМЕН"`, затем:
+После сертификата в `backend/.env` — `FRONTEND_ORIGIN="https://ВАШ_ДОМЕН"`, затем:
 
 ```bash
 sudo systemctl restart grozzapchasti-api
 ```
+
+Откройте `https://ВАШ_ДОМЕН`.
 
 ---
 
@@ -301,7 +229,6 @@ sudo systemctl restart grozzapchasti-api
 cd /var/www/grozzapchasti
 git pull
 
-# бэк
 cd backend
 npm ci
 npx prisma contract emit
@@ -309,28 +236,27 @@ npx prisma db update
 npm run build
 sudo systemctl restart grozzapchasti-api
 
-# фронт
 cd ../front
 pnpm install --frozen-lockfile
 pnpm build
 sudo chmod -R g+rX dist
 ```
 
-`db update` — когда менялась схема Prisma. Первый раз на пустой БД — `db init` (шаг 4), не `db update`.
+`db update` — когда менялась схема Prisma. Первый раз на пустой БД — `db init` (шаг 4).
 
-Сиды при обновлении **не** гонять: они удаляют каталог.
-
-После `git pull` проверьте, что `.env` на месте (в git его нет).
+Сиды при обновлении **не** гонять. После `git pull` проверьте, что `.env` на месте.
 
 ---
 
 ## 8. Что проверить
 
-- Главная открывается, ленты марок / моделей / запчастей грузятся.
-- Фото в карточках (если уже загружали) открываются по `/uploads/...`.
-- `/cart` и `/contacts` не отдают 404 Nginx (отдаётся `index.html`).
-- `/admin/login` — вход с `ADMIN_LOGIN` / `ADMIN_PASSWORD` из `.env`.
-- После логина можно создать марку с фото; файл появляется в `backend/uploads/marks/`.
+- `https://` открывается, в адресной строке замок, не «Не защищено».
+- Ленты марок / моделей / запчастей грузятся.
+- Фото открываются по `/uploads/...`.
+- `/cart` и `/contacts` не отдают 404 Nginx.
+- `/admin/login` — вход с логином/паролем из `.env` (после `db:set-admin`, если меняли). Браузер **не** должен писать про утечку пароля.
+- После логина можно создать марку с фото; файл в `backend/uploads/marks/`.
+- Сессия админа живёт 12 часов (потом снова логин).
 
 ---
 
@@ -339,15 +265,14 @@ sudo chmod -R g+rX dist
 | Симптом | Что смотреть |
 |---|---|
 | 502 на `/api` | `sudo systemctl status grozzapchasti-api`, `journalctl -u grozzapchasti-api -n 80` |
-| API падает сразу | `DATABASE_URL`, контейнер: `docker compose -f /var/www/grozzapchasti/backend/docker-compose.yml ps` |
-| Пустая витрина, в консоли CORS | `FRONTEND_ORIGIN` совпадает с адресом в браузере (`https://...`, без `/` в конце) |
-| Фото 404 | бэк запущен из `backend/` (WorkingDirectory), папка `uploads/` существует, Nginx проксирует `/uploads/` |
-| Не логинится админ | пароль из `.env` действует только при **первом** старте; дальше — запись в таблице `Admin` |
+| API падает сразу | `DATABASE_URL`, `JWT_SECRET`, `FRONTEND_ORIGIN` (на проде только https), контейнер Postgres |
+| Пустая витрина, CORS | `FRONTEND_ORIGIN` совпадает с адресом в браузере, без `/` в конце |
+| Фото 404 | WorkingDirectory = `backend/`, есть `uploads/`, Nginx проксирует `/uploads/` |
+| Не логинится админ | пароль из `.env` пишется в БД только при первом старте или `npm run db:set-admin` |
+| Chrome: «пароль найден в утечке» | пароль вроде `admin` — смените и выполните `npm run db:set-admin`; нужен HTTPS |
 | 413 при загрузке фото | `client_max_body_size` в Nginx |
 | `/cart` → 404 | `try_files` в `location /` |
 | Нет прав на запись фото | `www-data` владеет `backend/uploads` |
-
-Полезные команды:
 
 ```bash
 sudo systemctl restart grozzapchasti-api
@@ -357,14 +282,29 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ---
 
+## Безопасность (что уже в коде)
+
+- JWT в `sessionStorage`, не в `localStorage`. Срок 12 часов.
+- Логин ограничен: 5 попыток / 15 минут.
+- Пароли `admin` / `password` / короче 10 символов бэк не примет при создании админа.
+- На проде бэк не стартует с шаблонным `JWT_SECRET` или `http://` в `FRONTEND_ORIGIN`.
+- Фото: только jpeg/png/webp/gif, ≤ 10 МБ, имя uuid, путь без `..`.
+- Postgres слушает только localhost.
+- Helmet на API, заголовки в `deploy/nginx.conf`.
+- `/admin` закрыт в `robots.txt`, страница логина с `noindex`.
+
+Не коммитить `backend/.env`. После деплоя смените пароль Postgres в compose, если оставляли пример.
+
+---
+
 ## Кратко по файлам
 
 | Что | Где |
 |---|---|
 | Код | `/var/www/grozzapchasti` |
-| Env бэка | `backend/.env` (не коммитить) |
+| Env бэка | `backend/.env` (не в git) |
 | Фото | `backend/uploads/` |
 | Сборка фронта | `front/dist` |
-| Unit бэка | `/etc/systemd/system/grozzapchasti-api.service` |
-| Nginx | `/etc/nginx/sites-available/grozzapchasti` |
+| Unit бэка | `deploy/grozzapchasti-api.service` → `/etc/systemd/system/` |
+| Nginx | `deploy/nginx.conf` → `/etc/nginx/sites-available/grozzapchasti` |
 | Локальный запуск | `PLAN.md` § «Как гонять локально» |
