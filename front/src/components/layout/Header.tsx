@@ -1,8 +1,11 @@
 import { Link } from '@tanstack/react-router'
-import { Heart, Menu, ShoppingBag } from 'lucide-react'
+import { Heart, Menu, Phone, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { WhatsAppIcon } from '@/components/WhatsAppIcon'
 import { site } from '@/config/site'
+import { telHref } from '@/lib/format'
+import { whatsappChatHref } from '@/lib/order-message'
 import { logout, useIsAdmin } from '@/queries'
 import { selectCartCount, useCartStore, useFavoritesStore } from '@/stores'
 import { FavoritesSheet } from './FavoritesSheet'
@@ -29,7 +32,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center gap-3 px-4">
+      <div className="mx-auto flex h-[4.5rem] max-w-6xl items-center gap-3 px-4">
         <Button
           type="button"
           variant="ghost"
@@ -41,8 +44,13 @@ export function Header() {
           <Menu />
         </Button>
 
-        <Link to="/" className="shrink-0 font-heading text-lg font-semibold tracking-tight">
-          {site.name}
+        <Link to="/" className="flex shrink-0 items-center">
+          <img
+            src="/logo.png"
+            alt={site.name}
+            className="h-12 w-auto object-contain md:h-14"
+          />
+          <span className="sr-only">{site.name}</span>
         </Link>
 
         <nav className="ml-3 hidden items-center gap-6 text-sm md:flex">
@@ -59,6 +67,26 @@ export function Header() {
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-1">
+          <a
+            href={telHref(site.contacts.phone)}
+            className="mr-1 hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
+          >
+            <Phone className="size-4 text-highlight" aria-hidden />
+            +{site.contacts.phone}
+          </a>
+
+          <Button variant="ghost" size="icon" asChild>
+            <a
+              href={whatsappChatHref()}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Написать в WhatsApp"
+              title="Написать в WhatsApp"
+            >
+              <WhatsAppIcon />
+            </a>
+          </Button>
+
           {isAdmin ? (
             <div className="mr-2 hidden items-center gap-2 md:flex">
               <span className="text-xs tracking-wide text-highlight uppercase">Админ</span>

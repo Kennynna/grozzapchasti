@@ -1,13 +1,9 @@
-import { Check, Copy, ExternalLink } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import { site } from '@/config/site'
-import {
-  buildOrderMessage,
-  telegramChatHref,
-  type OrderLine,
-} from '@/lib/order-message'
+import { WhatsAppIcon } from '@/components/WhatsAppIcon'
+import { buildOrderMessage, whatsappChatHref, type OrderLine } from '@/lib/order-message'
 import { cn } from '@/lib/utils'
 
 type TelegramOrderActionsProps = {
@@ -22,7 +18,7 @@ export function TelegramOrderActions({
   className,
 }: TelegramOrderActionsProps) {
   const message = buildOrderMessage(lines)
-  const href = telegramChatHref(site.telegram)
+  const href = whatsappChatHref()
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -42,7 +38,7 @@ export function TelegramOrderActions({
   return (
     <div className={cn('flex flex-col gap-2', className)}>
       <p className="text-sm text-muted-foreground">
-        Скопируйте текст и отправьте нам в Telegram
+        Скопируйте текст и отправьте нам в WhatsApp
       </p>
       <div className="flex flex-wrap items-center gap-2">
         <Button type="button" disabled={disabled} onClick={() => void copyMessage()}>
@@ -50,8 +46,8 @@ export function TelegramOrderActions({
           {copied ? 'Скопировано' : 'Скопировать текст'}
         </Button>
         {disabled ? (
-          <Button type="button" variant="outline" size="icon" disabled aria-label="Открыть Telegram">
-            <ExternalLink />
+          <Button type="button" variant="outline" size="icon" disabled aria-label="Открыть WhatsApp">
+            <WhatsAppIcon />
           </Button>
         ) : (
           <Button variant="outline" size="icon" asChild>
@@ -59,10 +55,10 @@ export function TelegramOrderActions({
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Открыть Telegram"
-              title="Открыть Telegram"
+              aria-label="Открыть WhatsApp"
+              title="Открыть WhatsApp"
             >
-              <ExternalLink />
+              <WhatsAppIcon />
             </a>
           </Button>
         )}

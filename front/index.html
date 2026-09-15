@@ -2,16 +2,96 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f4ef" />
+    <title data-og="static">Zap-Auto — премиальные автозапчасти в Грозном</title>
     <meta
       name="description"
       content="Премиальные автозапчасти в Грозном. Оригинальные и проверенные компоненты, подбор по марке и модели."
     />
-    <title>Groz Zapchasti</title>
+    <meta
+      data-og="static"
+      name="keywords"
+      content="автозапчасти Грозный, оригинальные запчасти, запчасти Чечня, Zap-Auto, подбор запчастей по марке"
+    />
+    <meta data-og="static" name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta data-og="static" name="geo.region" content="RU-CE" />
+    <meta data-og="static" name="geo.placename" content="Грозный" />
+    <link data-og="static" rel="canonical" href="https://grozzapchasti.ru/" />
+    <link data-og="static" rel="alternate" hreflang="ru" href="https://grozzapchasti.ru/" />
+
+    <!--
+      Превью ссылки в WhatsApp и соцсетях. Витрина — SPA без SSR, поэтому мессенджеры видят
+      только эти статические теги; после гидрации их снимает dropStaticOgTags() из src/lib/seo.ts.
+      Домен дублируется в src/config/site.ts и public/sitemap.xml
+    -->
+    <meta data-og="static" property="og:type" content="website" />
+    <meta data-og="static" property="og:site_name" content="Zap-Auto" />
+    <meta data-og="static" property="og:locale" content="ru_RU" />
+    <meta
+      data-og="static"
+      property="og:title"
+      content="Zap-Auto — премиальные автозапчасти в Грозном"
+    />
+    <meta
+      data-og="static"
+      property="og:description"
+      content="Оригинальные и проверенные компоненты. Подбор по марке и модели, заказ в WhatsApp."
+    />
+    <meta data-og="static" property="og:url" content="https://grozzapchasti.ru/" />
+    <meta data-og="static" property="og:image" content="https://grozzapchasti.ru/og.png" />
+    <meta data-og="static" property="og:image:width" content="1200" />
+    <meta data-og="static" property="og:image:height" content="630" />
+    <meta
+      data-og="static"
+      property="og:image:alt"
+      content="Zap-Auto — премиальные автозапчасти"
+    />
+    <meta data-og="static" name="twitter:card" content="summary_large_image" />
+    <meta
+      data-og="static"
+      name="twitter:title"
+      content="Zap-Auto — премиальные автозапчасти в Грозном"
+    />
+    <meta
+      data-og="static"
+      name="twitter:description"
+      content="Оригинальные и проверенные компоненты. Подбор по марке и модели, заказ в WhatsApp."
+    />
+    <meta data-og="static" name="twitter:image" content="https://grozzapchasti.ru/og.png" />
+    <script data-og="static" type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "AutoPartsStore",
+        "name": "Zap-Auto",
+        "url": "https://grozzapchasti.ru",
+        "description": "Премиальные автозапчасти в Грозном. Оригинальные и проверенные компоненты, подбор по марке и модели.",
+        "telephone": "+79637071761",
+        "email": "m099kk77@mail.ru",
+        "image": "https://grozzapchasti.ru/og.png",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "ул. Назарбаева, 69",
+          "addressLocality": "Грозный",
+          "addressRegion": "Чеченская Республика",
+          "addressCountry": "RU"
+        },
+        "openingHours": "Mo-Sa 09:00-19:00",
+        "areaServed": "Чеченская Республика",
+        "priceRange": "₽₽"
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <p>Zap-Auto — премиальные автозапчасти в Грозном. Оригинальные и проверенные компоненты, подбор по марке и модели.</p>
+      <p>Адрес: город Грозный, ул Назарбаева, 69. Телефон: +7 963 707-17-61. Пн–Сб, 9:00–19:00.</p>
+      <p><a href="/contacts">Контакты, доставка и гарантия</a></p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

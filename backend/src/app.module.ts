@@ -9,6 +9,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { MarksModule } from './marks/marks.module';
 import { ModelsModule } from './models/models.module';
+import { SeoModule } from './seo/seo.module';
 import { SparePartsModule } from './spare-parts/spare-parts.module';
 import { UploadsModule } from './uploads/uploads.module';
 
@@ -21,6 +22,7 @@ import { UploadsModule } from './uploads/uploads.module';
     ModelsModule,
     CategoriesModule,
     SparePartsModule,
+    SeoModule,
   ],
   controllers: [AppController],
   providers: [

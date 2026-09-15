@@ -1,4 +1,4 @@
-// Текст заказа для Telegram. Оплаты нет. См. FRONT.md § «Оформить → Telegram»
+// Текст заказа. Оплаты нет. Раньше использовали Telegram, теперь — WhatsApp.
 import { site } from '@/config/site'
 import { formatPrice } from './format'
 
@@ -11,10 +11,6 @@ export type OrderLine = {
 
 export function orderTotal(lines: OrderLine[]) {
   return lines.reduce((sum, line) => sum + line.price * line.quantity, 0)
-}
-
-function telegramUsername(raw: string) {
-  return raw.replace(/^@/, '')
 }
 
 function formatOrderLine(index: number, line: OrderLine) {
@@ -31,6 +27,8 @@ export function buildOrderMessage(
   return [intro, '', ...rows].join('\n')
 }
 
-export function telegramChatHref(username: string = site.telegram) {
-  return `https://t.me/${telegramUsername(username)}`
+export function whatsappChatHref(number: string = site.whatsapp) {
+  // wa.me ждёт только цифры, без плюса
+  const clean = String(number).replace(/\D/g, '')
+  return `https://wa.me/${clean}`
 }

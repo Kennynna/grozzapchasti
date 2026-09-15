@@ -1,14 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Catalog, CatalogPending } from '@/components/catalog/Catalog'
+import { Assurances } from '@/components/home/Assurances'
 import { HomeHero } from '@/components/home/HomeHero'
+import { HowToOrder } from '@/components/home/HowToOrder'
+import { JsonLd } from '@/components/JsonLd'
 import { site } from '@/config/site'
 import { validateCatalogSearch } from '@/lib/catalog-search'
+import { catalogJsonLd, canonical, faqJsonLd, pageMeta, storeJsonLd } from '@/lib/seo'
 import {
   categoriesQueries,
   marksQueries,
   modelsQueries,
   queryClient,
   sparePartsQueries,
+  useSparePartsQuery,
 } from '@/queries'
 
 export const Route = createFileRoute('/')({
@@ -23,10 +28,11 @@ export const Route = createFileRoute('/')({
       queryClient.ensureQueryData(sparePartsQueries.list()),
     ]),
   head: () => ({
-    meta: [
-      { title: site.name },
-      { name: 'description', content: site.description },
-    ],
+    meta: pageMeta({
+      title: `${site.heroTitle} в Грозном · ${site.name}`,
+      path: '/',
+    }),
+    links: canonical('/'),
   }),
   component: HomePage,
 })
@@ -42,11 +48,15 @@ function HomePending() {
       >
         <CatalogPending markId={search.markId} modelId={search.modelId} />
       </section>
+      <HowToOrder />
+      <Assurances />
     </>
   )
 }
 
 function HomePage() {
+  const partsQuery = useSparePartsQuery()
+
   return (
     <>
       <HomeHero />
@@ -56,6 +66,13 @@ function HomePage() {
       >
         <Catalog />
       </section>
+      <HowToOrder />
+      <Assurances />
+      <JsonLd data={storeJsonLd()} />
+      <JsonLd data={faqJsonLd()} />
+      {partsQuery.data && partsQuery.data.length > 0 ? (
+        <JsonLd data={catalogJsonLd(partsQuery.data)} />
+      ) : null}
     </>
   )
 }

@@ -1,2 +1,16 @@
 User-agent: *
+Allow: /
 Disallow: /admin
+Disallow: /admin/
+Disallow: /cart
+Clean-param: page&markId&modelId&categoryId /
+
+User-agent: Yandex
+Allow: /
+Disallow: /admin
+Disallow: /admin/
+Disallow: /cart
+Clean-param: page&markId&modelId&categoryId /
+Host: https://grozzapchasti.ru
+
+Sitemap: https://grozzapchasti.ru/sitemap.xml

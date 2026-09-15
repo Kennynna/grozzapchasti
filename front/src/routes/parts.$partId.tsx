@@ -10,15 +10,26 @@ import {
 import { TelegramOrderActions } from '@/components/cart/TelegramOrderActions'
 import { ImageGallery } from '@/components/catalog/ImageGallery'
 import { SuggestedPartsStrip } from '@/components/catalog/SuggestedPartsStrip'
+import { JsonLd } from '@/components/JsonLd'
 import { QueryStatus } from '@/components/QueryStatus'
 import { ProductPageSkeleton, SuggestedStripSkeleton } from '@/components/query-skeletons'
 import { Button } from '@/components/ui/button'
 import { site } from '@/config/site'
 import { formatPrice, relatedPartsFor } from '@/lib/format'
 import { partFitLabel } from '@/lib/part-fit'
+import {
+  breadcrumbJsonLd,
+  canonical,
+  pageMeta,
+  partSeoDescription,
+  partSeoKeywords,
+  partSeoTitle,
+  productJsonLd,
+} from '@/lib/seo'
 import { cn } from '@/lib/utils'
 import {
   ApiError,
+  categoriesQueries,
   marksQueries,
   modelsQueries,
   queryClient,
@@ -56,6 +67,7 @@ export const Route = createFileRoute('/parts/$partId')({
         queryClient.ensureQueryData(sparePartsQueries.list()),
         queryClient.ensureQueryData(marksQueries.list()),
         queryClient.ensureQueryData(modelsQueries.list()),
+        queryClient.ensureQueryData(categoriesQueries.list()),
       ])
       return part
     } catch (error) {
@@ -65,15 +77,30 @@ export const Route = createFileRoute('/parts/$partId')({
       throw error
     }
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: `${loaderData?.name ?? 'Запчасть'} · ${site.name}` },
-      {
-        name: 'description',
-        content: loaderData?.description || site.description,
-      },
-    ],
-  }),
+  head: ({ loaderData, params }) => {
+    const path = `/parts/${params.partId}`
+    const part = loaderData
+    const marks = queryClient.getQueryData(marksQueries.list().queryKey)
+    const models = queryClient.getQueryData(modelsQueries.list().queryKey)
+    const categories = queryClient.getQueryData(categoriesQueries.list().queryKey)
+    const labels = {
+      markName: marks?.find((item) => item.id === part?.markId)?.name,
+      modelName: models?.find((item) => item.id === part?.modelId)?.name,
+      categoryName: categories?.find((item) => item.id === part?.categoryId)?.name,
+    }
+    return {
+      meta: pageMeta({
+        title: part ? partSeoTitle(part, labels) : `Запчасть · ${site.name}`,
+        description: part ? partSeoDescription(part, labels) : site.description,
+        path,
+        image: part?.images[0],
+        type: 'product',
+        keywords: part ? partSeoKeywords(part, labels) : undefined,
+        imageAlt: part?.name,
+      }),
+      links: canonical(path),
+    }
+  },
   component: PartPage,
 })
 
@@ -149,6 +176,14 @@ function PartPage() {
                   models={modelsQuery.data ?? []}
                 />
               ) : null}
+              <JsonLd
+                data={productJsonLd(part, {
+                  markName: mark?.name,
+                  modelName: model?.name,
+                  categoryName: category?.name,
+                })}
+              />
+              <JsonLd data={breadcrumbJsonLd(breadcrumbTrail(part, mark, model))} />
             </>
           )
         }}
@@ -177,6 +212,19 @@ function PartPage() {
       />
     </div>
   )
+}
+
+/** Хлебные крошки для микроразметки: те же ссылки, что и в `PartBreadcrumb`. */
+function breadcrumbTrail(part: SparePart, mark?: Mark, model?: Model) {
+  const trail = [{ name: 'Каталог', path: '/' }]
+  if (mark) {
+    trail.push({ name: mark.name, path: `/?markId=${mark.id}` })
+    if (model) {
+      trail.push({ name: model.name, path: `/?markId=${mark.id}&modelId=${model.id}` })
+    }
+  }
+  trail.push({ name: part.name, path: `/parts/${part.id}` })
+  return trail
 }
 
 function PartView({
@@ -284,47 +332,67 @@ function PartBreadcrumb({
   const crumbClass = 'hover:text-foreground'
 
   return (
-    <p className="text-sm text-muted-foreground">
-      <Link to="/" hash="catalog" className={crumbClass}>
-        Каталог
-      </Link>
-      {part.markId ? (
-        <>
-          <span className="px-2">/</span>
-          <Link
-            to="/"
-            search={{ markId: part.markId }}
-            hash="catalog"
-            className={crumbClass}
-          >
-            {markName ?? 'Марка'}
+    <nav aria-label="Навигация">
+      <ol className="flex flex-wrap items-center text-sm text-muted-foreground">
+        <li>
+          <Link to="/" hash="catalog" className={crumbClass}>
+            Каталог
           </Link>
-          {part.modelId ? (
-            <>
-              <span className="px-2">/</span>
+        </li>
+        {part.markId ? (
+          <>
+            <li className="flex items-center">
+              <span className="px-2" aria-hidden>
+                /
+              </span>
               <Link
                 to="/"
-                search={{ markId: part.markId, modelId: part.modelId }}
+                search={{ markId: part.markId }}
                 hash="catalog"
                 className={crumbClass}
               >
-                {modelName ?? 'Модель'}
+                {markName ?? 'Марка'}
               </Link>
-            </>
-          ) : (
-            <>
-              <span className="px-2">/</span>
-              <span>все модели</span>
-            </>
-          )}
-        </>
-      ) : (
-        <>
-          <span className="px-2">/</span>
-          <span>Для всех авто</span>
-        </>
-      )}
-    </p>
+            </li>
+            {part.modelId ? (
+              <li className="flex items-center">
+                <span className="px-2" aria-hidden>
+                  /
+                </span>
+                <Link
+                  to="/"
+                  search={{ markId: part.markId, modelId: part.modelId }}
+                  hash="catalog"
+                  className={crumbClass}
+                >
+                  {modelName ?? 'Модель'}
+                </Link>
+              </li>
+            ) : (
+              <li className="flex items-center">
+                <span className="px-2" aria-hidden>
+                  /
+                </span>
+                <span>все модели</span>
+              </li>
+            )}
+          </>
+        ) : (
+          <li className="flex items-center">
+            <span className="px-2" aria-hidden>
+              /
+            </span>
+            <span>Для всех авто</span>
+          </li>
+        )}
+        <li className="flex items-center">
+          <span className="px-2" aria-hidden>
+            /
+          </span>
+          <span aria-current="page">{part.name}</span>
+        </li>
+      </ol>
+    </nav>
   )
 }
 

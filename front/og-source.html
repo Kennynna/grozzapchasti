@@ -1,0 +1,204 @@
+<!doctype html>
+<!--
+  Источник картинки превью public/og.png (1200×630). В dist не попадает.
+  Перегенерировать: pnpm dev → открыть /og-source.html → снять скриншот области 1200×630.
+-->
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>og:image · Zap-Auto</title>
+    <style>
+      @font-face {
+        font-family: 'Manrope Variable';
+        src: url('/node_modules/@fontsource-variable/manrope/files/manrope-cyrillic-wght-normal.woff2')
+          format('woff2-variations');
+        font-weight: 200 800;
+        font-display: block;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        font-family: 'Manrope Variable', sans-serif;
+        color: #1a1714;
+        background: #f7f4ef;
+      }
+      .card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 1200px;
+        height: 630px;
+        padding: 0 72px;
+        overflow: hidden;
+      }
+      .glow,
+      .grid {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      .glow {
+        background:
+          radial-gradient(ellipse at 78% 44%, rgba(184, 135, 76, 0.16), transparent 44%),
+          radial-gradient(ellipse at 8% 0%, rgba(184, 135, 76, 0.05), transparent 38%);
+      }
+      .grid {
+        opacity: 0.16;
+        background-image:
+          linear-gradient(rgba(184, 135, 76, 0.2) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(184, 135, 76, 0.2) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: radial-gradient(ellipse at 70% 48%, black 20%, transparent 74%);
+      }
+      .text {
+        position: relative;
+        z-index: 1;
+        width: 620px;
+      }
+      .eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: #b8874c;
+      }
+      .eyebrow span {
+        width: 8px;
+        height: 8px;
+        background: #b8874c;
+      }
+      h1 {
+        margin-top: 26px;
+        font-size: 74px;
+        font-weight: 650;
+        line-height: 1.08;
+        letter-spacing: -0.03em;
+      }
+      p {
+        margin-top: 24px;
+        font-size: 27px;
+        line-height: 1.45;
+        color: #6b645c;
+      }
+      .meta {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+        margin-top: 44px;
+        padding-top: 26px;
+        border-top: 1px solid #d9d2c8;
+        font-size: 21px;
+        white-space: nowrap;
+        color: #1a1714;
+      }
+      .meta b {
+        font-weight: 600;
+      }
+      .meta i {
+        font-style: normal;
+        color: #d9d2c8;
+      }
+      .disc {
+        position: absolute;
+        top: -34px;
+        right: -96px;
+        z-index: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="glow"></div>
+      <div class="grid"></div>
+
+      <svg class="disc" width="700" height="700" viewBox="0 0 480 480" aria-hidden="true">
+        <defs>
+          <radialGradient id="face" cx="36%" cy="28%" r="68%">
+            <stop offset="0%" stop-color="#3A3A40" />
+            <stop offset="42%" stop-color="#1F1F23" />
+            <stop offset="100%" stop-color="#121214" />
+          </radialGradient>
+          <linearGradient id="rim" x1="18%" y1="8%" x2="86%" y2="92%">
+            <stop offset="0%" stop-color="#E5C3A1" />
+            <stop offset="48%" stop-color="#B8874C" />
+            <stop offset="100%" stop-color="#6E522E" />
+          </linearGradient>
+        </defs>
+
+        <circle cx="240" cy="240" r="172" fill="url(#face)" />
+        <circle cx="240" cy="240" r="172" fill="none" stroke="url(#rim)" stroke-width="2.4" />
+        <circle cx="240" cy="240" r="166" fill="none" stroke="#E5C3A1" stroke-opacity="0.2" />
+        <circle cx="240" cy="240" r="78" fill="#121214" />
+        <circle cx="240" cy="240" r="78" fill="none" stroke="#B8874C" stroke-opacity="0.35" />
+        <circle cx="240" cy="240" r="54" fill="none" stroke="#C7A17A" stroke-opacity="0.45" />
+        <circle cx="240" cy="240" r="22" fill="#0B0B0B" />
+        <circle cx="240" cy="240" r="22" fill="none" stroke="url(#rim)" stroke-width="1.6" />
+        <g id="slots"></g>
+        <g id="bolts"></g>
+      </svg>
+
+      <div class="text">
+        <div class="eyebrow"><span></span>Инженерия · Грозный</div>
+        <h1>Премиальные автозапчасти</h1>
+        <p>Оригинальные и проверенные компоненты для вашего автомобиля</p>
+        <div class="meta">
+          <b>Zap-Auto</b>
+          <i>/</i>
+          <span>+7 963 707-17-61</span>
+          <i>/</i>
+          <span>ул. Назарбаева, 69</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Прорези и болты диска: рисуем скриптом, чтобы не плодить 30 одинаковых тегов
+      const svgNs = 'http://www.w3.org/2000/svg'
+      const slots = document.getElementById('slots')
+      for (let index = 0; index < 28; index += 1) {
+        const rect = document.createElementNS(svgNs, 'rect')
+        rect.setAttribute('x', '236.8')
+        rect.setAttribute('y', '94')
+        rect.setAttribute('width', '6.4')
+        rect.setAttribute('height', '52')
+        rect.setAttribute('rx', '2.4')
+        rect.setAttribute('fill', '#0B0B0B')
+        rect.setAttribute('fill-opacity', '0.72')
+        rect.setAttribute('stroke', '#B8874C')
+        rect.setAttribute('stroke-opacity', '0.18')
+        rect.setAttribute('transform', `rotate(${(index * 360) / 28} 240 240)`)
+        slots.append(rect)
+      }
+
+      const bolts = document.getElementById('bolts')
+      for (let index = 0; index < 5; index += 1) {
+        const angle = ((index * 72 - 90) * Math.PI) / 180
+        const x = 240 + Math.cos(angle) * 46
+        const y = 240 + Math.sin(angle) * 46
+        const outer = document.createElementNS(svgNs, 'circle')
+        outer.setAttribute('cx', x)
+        outer.setAttribute('cy', y)
+        outer.setAttribute('r', '11')
+        outer.setAttribute('fill', '#0B0B0B')
+        outer.setAttribute('stroke', '#C7A17A')
+        const inner = document.createElementNS(svgNs, 'circle')
+        inner.setAttribute('cx', x)
+        inner.setAttribute('cy', y)
+        inner.setAttribute('r', '5.2')
+        inner.setAttribute('fill', '#1A1A1D')
+        inner.setAttribute('stroke', '#E5C3A1')
+        inner.setAttribute('stroke-opacity', '0.7')
+        bolts.append(outer, inner)
+      }
+    </script>
+  </body>
+</html>

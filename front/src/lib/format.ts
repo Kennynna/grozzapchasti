@@ -7,6 +7,11 @@ export function formatPrice(rubles: number) {
   return `${priceFormatter.format(rubles)} ₽`
 }
 
+/** Телефон из site.contacts записан для чтения, в ссылку идут только цифры. */
+export function telHref(phone: string) {
+  return `tel:+${phone.replace(/\D/g, '')}`
+}
+
 /** Основная сетка: только точное авто. Универсальные туда не попадают. */
 export function filterSpareParts(parts: SparePart[], search: CatalogSearch) {
   return parts.filter((part) => {

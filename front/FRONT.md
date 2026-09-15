@@ -31,6 +31,12 @@
   - `src/components/ui/` — не трогать без нужды. Новые примитивы: `pnpm dlx shadcn@latest add <name>`
 - [x] Контакты и копирайт
   - `src/config/site.ts` — статика витрины, не с бэка
+- [x] SEO для роботов
+  - `src/lib/seo.ts` — title/description/canonical/og/twitter/geo, JSON-LD магазина, FAQ, каталога и товара
+  - `index.html` — статичные meta + JSON-LD + `<noscript>` для краулеров без JS
+  - `public/robots.txt` — Disallow `/admin` и `/cart`, Clean-param фильтров, Host и Sitemap для Яндекса
+  - `public/sitemap.xml` — индекс на `GET /api/sitemap.xml` (карточки с бэка)
+  - `/cart`, `/admin/*`, 404 и ошибки — `noindex, nofollow`
 - [x] Моки выкинуты
   - `src/config/constants.ts` — только `API_URL`
 
@@ -237,7 +243,7 @@ front/src/
 1. [x] Тема: CSS-токены + Manrope + `forcedTheme="light"`.
    - `src/index.css` — светлая палитра из таблицы ниже, `--radius: 0.375rem`, Geist убран, `@fontsource-variable/manrope` (`Manrope Variable`)
    - `src/main.tsx` — `ThemeProvider` с `defaultTheme="light"` и `forcedTheme="light"`
-   - `index.html` — `lang="ru"`, без `class="dark"`, title `Groz Zapchasti`
+   - `index.html` — `lang="ru"`, без `class="dark"`, title `Zap-Auto`
    - `src/components/ui/button.tsx` — hover CTA на `--primary-hover`
 2. [x] TanStack Router + layout (шапка/подвал/мобиле) + пустые страницы.
    - `vite.config.ts` — `@tanstack/router-plugin` **перед** React-плагином
@@ -280,7 +286,7 @@ front/src/
    - `src/components/layout/Footer.tsx` — ссылки на якоря, копирайт, Telegram
 7. [x] `/admin/login` + `isAdmin` в UI (плюсы; кебаб — шаг 8; индикатор в шапке уже есть).
    - `src/routes/admin.login.tsx` — форма логина, 401/ошибка API, редирект на `/` если уже админ; пока `me` pending — `LoginSessionSkeleton`; пока `login` pending — `MutationBusy` + `SubmitButton`; `robots: noindex, nofollow`
-   - `public/robots.txt` — `Disallow: /admin`
+   - `public/robots.txt` — `Disallow: /admin` и `/cart`, `Clean-param` для фильтров каталога, `Host` + `Sitemap` для Яндекса
    - `src/components/catalog/AdminAddTile.tsx` — `+` только при пропе `isAdmin` (с шага 10), `stopPropagation`
    - ленты/сетка — плюс → `/admin/new/mark|model|category|part` (формы — шаг 9)
 8. [x] Кебаб, модалка редактирования (dirty), удаление.
@@ -316,7 +322,7 @@ front/src/
     - шаг 16: те же `+` / галочка на странице товара; крошки ведут в каталог с фильтрами; блок «Возможно, вам понадобится»
 14. [x] Hero, контакты Telegram, 404, meta.
     - Hero — `src/components/home/HomeHero.tsx` (схема диска + `site.heroHighlights`); CTA только «Перейти в каталог»
-    - `site.description` + meta на `/`, `/contacts`, `/cart`, `/parts/$partId`; `index.html`
+    - `site.description` + meta на `/`, `/contacts`, `/cart`, `/parts/$partId`; `index.html`; JSON-LD AutoPartsStore / Product / FAQ / ItemList; живой sitemap карточек — `GET /api/sitemap.xml`
     - `/contacts` и футер — ссылка на `t.me/<username>`
     - `__root.tsx` `notFoundComponent` — «Страница не найдена»
 15. [x] Применимость запчасти: эта модель / вся марка / все авто.

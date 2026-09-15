@@ -5,9 +5,10 @@
 ```
 браузер
   → Nginx :80 / :443
-       /          front/dist  (SPA)
-       /api       127.0.0.1:4060
-       /uploads   127.0.0.1:4060
+       /               front/dist  (SPA)
+       /sitemap.xml    front/dist  (индекс → /api/sitemap.xml)
+       /api            127.0.0.1:4060
+       /uploads        127.0.0.1:4060
   → NestJS (systemd)
   → Postgres (Docker, порт только 127.0.0.1:5432)
 ```
@@ -291,7 +292,8 @@ sudo nginx -t && sudo systemctl reload nginx
 - Фото: только jpeg/png/webp/gif, ≤ 10 МБ, имя uuid, путь без `..`.
 - Postgres слушает только localhost.
 - Helmet на API, заголовки в `deploy/nginx.conf`.
-- `/admin` закрыт в `robots.txt`, страница логина с `noindex`.
+- `/admin` и `/cart` закрыты в `robots.txt`; логин, админка, корзина, 404 — `noindex`.
+- Карта сайта: `https://ВАШ_ДОМЕН/sitemap.xml` → `GET /api/sitemap.xml` (главная, контакты, карточки).
 
 Не коммитить `backend/.env`. После деплоя смените пароль Postgres в compose, если оставляли пример.
 

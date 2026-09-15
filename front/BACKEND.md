@@ -35,6 +35,12 @@ Authorization: Bearer <accessToken>
 
 Витринные `GET` без токена.
 
+```
+GET /api/sitemap.xml
+```
+
+XML-карта сайта: `/`, `/contacts` и все `/parts/:id` с `lastmod` и фото. Роботы заходят по `public/sitemap.xml` (индекс) или сразу на этот URL. `FRONTEND_ORIGIN` без слэша в конце — база для `<loc>`.
+
 ---
 
 ## Ошибки

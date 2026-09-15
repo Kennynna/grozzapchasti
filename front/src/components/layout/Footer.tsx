@@ -1,5 +1,8 @@
 import { Link } from '@tanstack/react-router'
+import { WhatsAppIcon } from '@/components/WhatsAppIcon'
 import { site } from '@/config/site'
+import { telHref } from '@/lib/format'
+import { whatsappChatHref } from '@/lib/order-message'
 
 const year = new Date().getFullYear()
 
@@ -27,25 +30,26 @@ export function Footer() {
             </Link>
           ))}
         </nav>
-        <div className="space-y-1 text-sm text-muted-foreground">
+        <address className="space-y-1 text-sm not-italic text-muted-foreground">
           <p>
-            <a className="hover:text-foreground" href={`tel:${phone.replace(/\s/g, '')}`}>
-              {phone}
+            <a className="hover:text-foreground" href={telHref(phone)}>
+              +{phone}
             </a>
           </p>
           <p>
             <a
-              className="hover:text-foreground"
-              href={`https://t.me/${site.telegram}`}
+              className="hover:text-foreground inline-flex items-center gap-2"
+              href={whatsappChatHref()}
               target="_blank"
               rel="noreferrer"
             >
-              Telegram
+              <WhatsAppIcon className="size-[18px]" />
+              WhatsApp
             </a>
           </p>
           <p>{address}</p>
           <p>{hours}</p>
-        </div>
+        </address>
       </div>
       <div className="border-t border-border">
         <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted-foreground">

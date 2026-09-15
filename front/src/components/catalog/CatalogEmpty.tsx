@@ -1,4 +1,4 @@
-import { telegramChatHref } from '@/lib/order-message'
+import { whatsappChatHref } from '@/lib/order-message'
 
 type CatalogEmptyProps = {
   onReset: () => void
@@ -18,12 +18,12 @@ export function CatalogEmpty({ onReset }: CatalogEmptyProps) {
         </button>{' '}
         или уточните у менеджера в{' '}
         <a
-          href={telegramChatHref()}
+          href={whatsappChatHref()}
           target="_blank"
           rel="noopener noreferrer"
           className="text-primary underline-offset-4 hover:underline"
         >
-          Telegram
+          WhatsApp
         </a>
         .
       </p>

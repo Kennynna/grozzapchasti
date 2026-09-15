@@ -1,9 +1,11 @@
 import { HeadContent, Link, Outlet, createRootRoute } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect } from 'react'
+import { RobotsMeta } from '@/components/JsonLd'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
 import { Button } from '@/components/ui/button'
 import { site } from '@/config/site'
+import { dropStaticOgTags } from '@/lib/seo'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -31,6 +33,7 @@ function Shell({ children }: { children: ReactNode }) {
 function RootError({ error }: { error: Error }) {
   return (
     <Shell>
+      <RobotsMeta content="noindex, nofollow" />
       <div className="mx-auto max-w-6xl px-4 py-16">
         <h1 className="text-2xl">Не удалось показать страницу</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
@@ -45,6 +48,7 @@ function RootError({ error }: { error: Error }) {
 function NotFound() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-16">
+      <RobotsMeta content="noindex, nofollow" />
       <h1 className="text-2xl">Страница не найдена</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Такой страницы нет. Вернитесь в каталог и выберите запчасть.
@@ -59,6 +63,10 @@ function NotFound() {
 }
 
 function RootLayout() {
+  useEffect(() => {
+    dropStaticOgTags()
+  }, [])
+
   return (
     <Shell>
       <Outlet />

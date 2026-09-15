@@ -1,13 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CartView } from '@/components/cart/CartView'
 import { site } from '@/config/site'
+import { pageMeta } from '@/lib/seo'
 
 export const Route = createFileRoute('/cart')({
   head: () => ({
-    meta: [
-      { title: `Корзина · ${site.name}` },
-      { name: 'description', content: site.description },
-    ],
+    // Корзина живёт в localStorage, в индексе ей делать нечего
+    meta: pageMeta({ title: `Корзина · ${site.name}`, path: '/cart', noindex: true }),
   }),
   component: CartPage,
 })

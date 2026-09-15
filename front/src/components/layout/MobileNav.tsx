@@ -1,5 +1,7 @@
 import { Link } from '@tanstack/react-router'
+import { Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { WhatsAppIcon } from '@/components/WhatsAppIcon'
 import {
   Sheet,
   SheetContent,
@@ -7,6 +9,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { site } from '@/config/site'
+import { telHref } from '@/lib/format'
+import { whatsappChatHref } from '@/lib/order-message'
 
 type MobileNavProps = {
   open: boolean
@@ -20,7 +24,10 @@ export function MobileNav({ open, onOpenChange, isAdmin, onLogout }: MobileNavPr
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-72">
         <SheetHeader>
-          <SheetTitle>{site.name}</SheetTitle>
+          <SheetTitle>
+            <img src="/logo.png" alt={site.name} className="h-10 w-auto object-contain" />
+            <span className="sr-only">{site.name}</span>
+          </SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-4">
           {site.nav.map((item) => (
@@ -52,6 +59,26 @@ export function MobileNav({ open, onOpenChange, isAdmin, onLogout }: MobileNavPr
             </Button>
           ) : null}
         </nav>
+
+        <div className="mt-2 space-y-3 border-t border-border px-4 pt-6 text-sm">
+          <a
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            href={telHref(site.contacts.phone)}
+          >
+            <Phone className="size-4 text-highlight" aria-hidden />
+            +{site.contacts.phone}
+          </a>
+          <a
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            href={whatsappChatHref()}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <WhatsAppIcon />
+            Написать в WhatsApp
+          </a>
+          <p className="text-muted-foreground">{site.contacts.hours}</p>
+        </div>
       </SheetContent>
     </Sheet>
   )
