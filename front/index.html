@@ -7,6 +7,33 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f4ef" />
+    <link rel="preload" as="image" href="/logo.webp" type="image/webp" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #f7f4ef;
+      }
+      .boot-header {
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        height: 4.5rem;
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 0 1rem;
+        border-bottom: 1px solid #d9d2c8;
+      }
+      .boot-logo {
+        height: 3rem;
+        width: auto;
+      }
+      @media (min-width: 768px) {
+        .boot-logo {
+          height: 3.5rem;
+        }
+      }
+    </style>
     <title data-og="static">Zap-Auto — премиальные автозапчасти в Грозном</title>
     <meta
       name="description"
@@ -86,7 +113,17 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <header class="boot-header">
+        <img
+          class="boot-logo"
+          src="/logo.webp"
+          alt="Zap-Auto"
+          width="424"
+          height="196"
+        />
+      </header>
+    </div>
     <noscript>
       <p>Zap-Auto — премиальные автозапчасти в Грозном. Оригинальные и проверенные компоненты, подбор по марке и модели.</p>
       <p>Адрес: город Грозный, ул Назарбаева, 69. Телефон: +7 963 707-17-61. Пн–Сб, 9:00–19:00.</p>

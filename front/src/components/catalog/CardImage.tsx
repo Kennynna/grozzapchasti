@@ -1,5 +1,8 @@
+import { imageThumbSrc } from '@/lib/images'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
+
+type CardImageVariant = 'thumb' | 'full'
 
 type CardImageProps = {
   src?: string
@@ -7,6 +10,13 @@ type CardImageProps = {
   className?: string
   imageClassName?: string
   priority?: boolean
+  variant?: CardImageVariant
+  sizes?: string
+}
+
+const DEFAULT_SIZES: Record<CardImageVariant, string> = {
+  thumb: '(min-width: 1024px) 280px, (min-width: 768px) 33vw, 50vw',
+  full: '(min-width: 768px) 560px, 100vw',
 }
 
 export function CardImage({
@@ -15,9 +25,18 @@ export function CardImage({
   className,
   imageClassName,
   priority = false,
+  variant = 'thumb',
+  sizes,
 }: CardImageProps) {
   const [failedSrc, setFailedSrc] = useState<string>()
-  const showImage = Boolean(src) && failedSrc !== src
+  const [fallbackFor, setFallbackFor] = useState<string>()
+  const thumb = imageThumbSrc(src)
+  const hasThumb = Boolean(src && thumb && thumb !== src)
+  const useFull = variant === 'full' || fallbackFor === src
+  const active = useFull ? src : thumb
+  const showImage = Boolean(active) && failedSrc !== src
+  const srcSet =
+    hasThumb && fallbackFor !== src ? `${thumb} 800w, ${src} 1600w` : undefined
 
   return (
     <div
@@ -28,18 +47,26 @@ export function CardImage({
     >
       {showImage ? (
         <img
-          src={src}
+          src={active}
+          srcSet={srcSet}
+          sizes={sizes ?? DEFAULT_SIZES[variant]}
           alt={alt}
-          width={400}
-          height={300}
+          width={variant === 'full' ? 800 : 400}
+          height={variant === 'full' ? 600 : 300}
           loading={priority ? 'eager' : 'lazy'}
           decoding="async"
           fetchPriority={priority ? 'high' : 'low'}
+          key={`${src}-${useFull ? 'full' : 'thumb'}`}
           className={cn('absolute inset-0 size-full object-cover', imageClassName)}
           onError={() => {
-            if (src) {
-              setFailedSrc(src)
+            if (!src) {
+              return
             }
+            if (hasThumb && fallbackFor !== src) {
+              setFallbackFor(src)
+              return
+            }
+            setFailedSrc(src)
           }}
         />
       ) : (

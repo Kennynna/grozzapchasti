@@ -88,7 +88,7 @@ function AvailableRow({
         className="shrink-0"
         aria-label={part.name}
       >
-        <CardImage src={image} alt={part.name} className="size-20 aspect-auto rounded-md" />
+        <CardImage src={image} alt={part.name} className="size-20 aspect-auto rounded-md" sizes="80px" />
       </Link>
       <div className="min-w-0 flex-1">
         <Link

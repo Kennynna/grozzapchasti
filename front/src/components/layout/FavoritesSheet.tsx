@@ -45,7 +45,7 @@ function FavoriteRow({
         aria-label={part.name}
         onClick={() => onOpenChange(false)}
       >
-        <CardImage src={image} alt={part.name} className="size-16 aspect-auto rounded-md" />
+        <CardImage src={image} alt={part.name} className="size-16 aspect-auto rounded-md" sizes="64px" />
       </Link>
       <div className="min-w-0 flex-1">
         <Link

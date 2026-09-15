@@ -2,6 +2,11 @@ export const MAX_PHOTOS = 3;
 export const MAX_FILE_SIZE_MB = 10;
 export const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
 
+export const IMAGE_FULL_MAX_PX = 1600;
+export const IMAGE_THUMB_MAX_PX = 800;
+export const IMAGE_WEBP_QUALITY = 80;
+export const IMAGE_THUMB_QUALITY = 72;
+
 export const IMAGE_FILENAME_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(jpe?g|png|webp|gif)$/i;
 

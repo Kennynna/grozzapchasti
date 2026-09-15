@@ -304,12 +304,16 @@ front/src/
    - `AdminFieldLabel` — у поля «обязательно» (бронза) или «необязательно» (серый); create и edit
 10. [x] Оптимизация витрины. `React.memo` не трогать — Compiler уже в Vite.
     - `src/components/catalog/CardImage.tsx` — `loading="lazy"`, `decoding="async"`, `width`/`height`, `fetchPriority` у первых двух марок; превью корзины/избранного через тот же `CardImage`
+    - `src/lib/images.ts` — `imageThumbSrc`: для новых webp карточки берут `uuid.thumb.webp`, галерея — полный файл + `srcset`
     - `src/queries/query-client.ts` — `catalogQueryDefaults` (`staleTime` 5 мин, без `refetchOnWindowFocus`); размазано по `marks` / `models` / `categories` / `spare-parts` list+detail. `auth`/`me` не трогали
     - `src/routes/index.tsx` `loader` — `ensureQueryData` на четыре списка
     - `src/components/admin/lazy-dialogs.tsx` — `React.lazy` для `Edit*` и `ConfirmDelete`; ленты/сетка импортируют обёртки, чанки диалогов отдельно
     - `AdminKebab` / `AdminAddTile` — проп `isAdmin`, без `useMeQuery` на плитке; один `useIsAdmin()` в `Catalog` / `Header`
     - `FavoritesSheet` — `useSparePartsQuery({}, { enabled: open })`
     - `src/lib/format.ts` — один `Intl.NumberFormat('ru-RU')` на модуль
+    - `src/main.tsx` — `defaultPreload: 'intent'`; `next-themes` убран (тема всегда светлая)
+    - `index.html` — preload логотипа и скелетон шапки до гидрации; `src/index.css` — Manrope только cyrillic + latin
+    - логотип: `public/logo.webp`, размеры в `site.logo`
 11. [x] Шаринг фильтров. Чипы выбранного авто и слайдер цены не показываем — выбор виден на лентах.
     - На `/` марка/модель/категория/`page` живут в URL (`catalog-search.ts`). Persist стора — запас, если пришли на `/` без query
     - `Catalog` пишет и URL, и стор в `patchCatalog`. `PriceFilter.tsx` удалён, `priceMin`/`priceMax` из URL убраны
@@ -358,6 +362,6 @@ front/src/
 - Вложенные mark/model в ответе запчасти — джойним на клиенте из списков.
 - `React.memo` / ручной `useCallback` на карточках — React Compiler уже включён.
 - Виртуализация сетки (`@tanstack/react-virtual`) — каталог маленький, рано.
-- Превью/ресайз фото на бэке, CDN, `srcset` — отдельный бэк-шаг. На фронте только lazy/async.
+- CDN для фото. Ресайз/WebP/превью при загрузке и `srcset` на витрине уже есть. Старые jpeg/png без превью, пока не зальют заново.
 
 Категория: `POST /api/categories` = `name` + `description?`. Этого достаточно.

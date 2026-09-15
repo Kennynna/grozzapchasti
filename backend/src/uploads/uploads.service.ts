@@ -3,6 +3,7 @@ import { mkdir, unlink, writeFile } from 'fs/promises';
 import { join, resolve } from 'path';
 import { randomUUID } from 'crypto';
 import { sniffImageMime } from './image-type';
+import { rasterToWebp, thumbSiblingPath } from './image-optimize';
 import {
   EXT_BY_MIME,
   FILE_TOO_LARGE_MESSAGE,
@@ -12,6 +13,8 @@ import {
   MAX_PHOTOS,
   TOO_MANY_PHOTOS_MESSAGE,
 } from './uploads.constants';
+
+const IMAGE_PROCESS_FAILED_MESSAGE = 'Не удалось обработать изображение';
 
 @Injectable()
 export class UploadsService {
@@ -51,8 +54,26 @@ export class UploadsService {
         if (!ext) {
           throw new BadRequestException(INVALID_IMAGE_TYPE_MESSAGE);
         }
-        const filename = `${randomUUID()}${ext}`;
-        await writeFile(join(dir, filename), file.buffer);
+
+        const id = randomUUID();
+        if (sniffed === 'image/gif') {
+          const filename = `${id}${ext}`;
+          await writeFile(join(dir, filename), file.buffer);
+          saved.push(this.publicPath(subdir, filename));
+          continue;
+        }
+
+        let optimized: Awaited<ReturnType<typeof rasterToWebp>>;
+        try {
+          optimized = await rasterToWebp(file.buffer);
+        } catch {
+          throw new BadRequestException(IMAGE_PROCESS_FAILED_MESSAGE);
+        }
+
+        const filename = `${id}.webp`;
+        const abs = join(dir, filename);
+        await writeFile(abs, optimized.full);
+        await writeFile(thumbSiblingPath(abs), optimized.thumb);
         saved.push(this.publicPath(subdir, filename));
       }
       return saved;
@@ -65,6 +86,7 @@ export class UploadsService {
   async removeFile(publicPath: string): Promise<void> {
     const abs = this.toAbsolute(publicPath);
     await unlink(abs).catch(() => undefined);
+    await unlink(thumbSiblingPath(abs)).catch(() => undefined);
   }
 
   async removeFiles(paths: readonly string[]): Promise<void> {

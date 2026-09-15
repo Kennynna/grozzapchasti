@@ -22,7 +22,7 @@ export function ImageGallery({ images, alt, className }: ImageGalleryProps) {
   return (
     <div className={cn('space-y-3', className)}>
       <div className="relative overflow-hidden rounded-lg">
-        <CardImage src={src} alt={alt} className="rounded-lg" priority />
+        <CardImage src={src} alt={alt} className="rounded-lg" variant="full" priority />
         {count > 1 ? (
           <>
             <Button
@@ -62,7 +62,7 @@ export function ImageGallery({ images, alt, className }: ImageGalleryProps) {
               )}
               onClick={() => setIndex(imageIndex)}
             >
-              <CardImage src={image} alt="" className="size-16 aspect-auto" />
+              <CardImage src={image} alt="" className="size-16 aspect-auto" sizes="64px" />
             </button>
           ))}
         </div>

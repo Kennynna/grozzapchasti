@@ -46,8 +46,12 @@ export function Header() {
 
         <Link to="/" className="flex shrink-0 items-center">
           <img
-            src="/logo.png"
+            src={site.logo.src}
             alt={site.name}
+            width={site.logo.width}
+            height={site.logo.height}
+            decoding="async"
+            fetchPriority="high"
             className="h-12 w-auto object-contain md:h-14"
           />
           <span className="sr-only">{site.name}</span>

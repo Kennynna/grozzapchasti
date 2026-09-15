@@ -151,7 +151,7 @@ function ModelTile({
             : 'border-border hover:border-muted-foreground/40 hover:bg-accent',
         )}
       >
-        <CardImage src={image} alt={model.name} />
+        <CardImage src={image} alt={model.name} sizes="144px" />
         <span className="truncate px-3 py-2 text-sm font-medium">{model.name}</span>
       </button>
       <AdminKebab

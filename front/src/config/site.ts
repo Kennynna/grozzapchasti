@@ -11,6 +11,11 @@ export const site = {
   ogImage: '/og.png',
   ogImageWidth: 1200,
   ogImageHeight: 630,
+  logo: {
+    src: '/logo.webp',
+    width: 424,
+    height: 196,
+  },
   heroEyebrow: 'Инженерия · Грозный',
   heroTitle: 'Премиальные автозапчасти',
   heroSubtitle: 'Оригинальные и проверенные компоненты для вашего автомобиля',

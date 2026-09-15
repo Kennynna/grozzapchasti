@@ -144,7 +144,7 @@ function MarkTile({
             : 'border-border hover:border-muted-foreground/40 hover:bg-accent',
         )}
       >
-        <CardImage src={image} alt={mark.name} priority={priority} />
+        <CardImage src={image} alt={mark.name} priority={priority} sizes="144px" />
         <span className="truncate px-3 py-2 text-sm font-medium">{mark.name}</span>
       </button>
       <AdminKebab

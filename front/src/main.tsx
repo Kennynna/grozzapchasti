@@ -2,7 +2,6 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { ThemeProvider } from 'next-themes'
 import { Toaster } from '@/components/ui/sonner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { queryClient } from '@/queries'
@@ -11,6 +10,8 @@ import './index.css'
 
 const router = createRouter({
   routeTree,
+  defaultPreload: 'intent',
+  defaultPreloadStaleTime: 30_000,
   defaultPendingMs: 0,
   defaultPendingComponent: () => (
     <div className="mx-auto max-w-6xl px-4 py-16" aria-busy="true">
@@ -28,10 +29,8 @@ declare module '@tanstack/react-router' {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light" disableTransitionOnChange>
-        <RouterProvider router={router} />
-        <Toaster />
-      </ThemeProvider>
+      <RouterProvider router={router} />
+      <Toaster />
     </QueryClientProvider>
   </StrictMode>,
 )

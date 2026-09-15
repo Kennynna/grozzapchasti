@@ -25,7 +25,14 @@ export function MobileNav({ open, onOpenChange, isAdmin, onLogout }: MobileNavPr
       <SheetContent side="left" className="w-72">
         <SheetHeader>
           <SheetTitle>
-            <img src="/logo.png" alt={site.name} className="h-10 w-auto object-contain" />
+            <img
+              src={site.logo.src}
+              alt={site.name}
+              width={site.logo.width}
+              height={site.logo.height}
+              decoding="async"
+              className="h-10 w-auto object-contain"
+            />
             <span className="sr-only">{site.name}</span>
           </SheetTitle>
         </SheetHeader>

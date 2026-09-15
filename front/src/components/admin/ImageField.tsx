@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { X } from 'lucide-react'
 import { Spinner } from '@/components/mutation-ui'
 import { Button } from '@/components/ui/button'
+import { imageThumbSrc } from '@/lib/images'
 
 export const IMAGE_MAX_COUNT = 3
 export const IMAGE_MAX_BYTES = 10 * 1024 * 1024
@@ -75,7 +76,7 @@ export function ImageField({
       <div className="flex flex-wrap gap-2">
         {existing.map((src) => (
           <div key={src} className="relative size-20 overflow-hidden rounded-md bg-secondary">
-            <img src={src} alt="" className="size-full object-cover" />
+            <img src={imageThumbSrc(src)} alt="" className="size-full object-cover" />
             {removingExisting === src ? (
               <span className="absolute inset-0 flex items-center justify-center bg-background/70">
                 <Spinner />
