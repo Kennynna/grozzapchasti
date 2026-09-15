@@ -44,7 +44,7 @@ export function Header() {
           <Menu />
         </Button>
 
-        <Link to="/" className="flex shrink-0 items-center">
+        <Link to="/" className="hidden shrink-0 items-center md:flex">
           <img
             src={site.logo.src}
             alt={site.name}

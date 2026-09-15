@@ -4,11 +4,17 @@ import { cn } from '@/lib/utils'
 
 export const partsGridClass = 'grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-3'
 
-export function StripTilesSkeleton({ count = 4 }: { count?: number }) {
+export function StripTilesSkeleton({
+  count = 6,
+  rows = 1,
+}: {
+  count?: number
+  rows?: 1 | 2
+}) {
   return (
-    <HorizontalScroller>
+    <HorizontalScroller rows={rows}>
       {Array.from({ length: count }, (_, index) => (
-        <Skeleton key={index} className="h-28 w-36 shrink-0 rounded-lg" />
+        <Skeleton key={index} className="h-36 w-36 shrink-0 rounded-lg" />
       ))}
     </HorizontalScroller>
   )

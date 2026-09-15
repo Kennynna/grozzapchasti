@@ -7,14 +7,12 @@ import {
 } from '@/components/admin/lazy-dialogs'
 import { QueryStatus } from '@/components/QueryStatus'
 import { StripTilesSkeleton } from '@/components/query-skeletons'
-import { Button } from '@/components/ui/button'
-import { previewStrip } from '@/lib/catalog-strip'
 import { cn } from '@/lib/utils'
 import { firstImageSrc, useDeleteMarkMutation, type Mark } from '@/queries'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { AdminAddTile } from './AdminAddTile'
 import { CardImage } from './CardImage'
-import { ShowAllTile, StripOrWrap } from './ShowAll'
+import { HorizontalScroller } from './HorizontalScroller'
 
 type MarksStripProps = {
   query: UseQueryResult<Mark[]>
@@ -27,21 +25,13 @@ export function MarksStrip({ query, selectedId, onSelect, isAdmin }: MarksStripP
   const deleteMutation = useDeleteMarkMutation()
   const [editId, setEditId] = useState<number>()
   const [deleting, setDeleting] = useState<Mark>()
-  const [expanded, setExpanded] = useState(false)
   const editing = (query.data ?? []).find((item) => item.id === editId)
 
   return (
     <section id="marks" className="scroll-mt-20 space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">Марка</h2>
-          <p className="text-sm text-muted-foreground">Выберите марку</p>
-        </div>
-        {expanded ? (
-          <Button type="button" variant="ghost" size="sm" onClick={() => setExpanded(false)}>
-            Свернуть
-          </Button>
-        ) : null}
+      <div>
+        <h2 className="text-lg font-semibold">Марка</h2>
+        <p className="text-sm text-muted-foreground">Выберите марку</p>
       </div>
       <QueryStatus
         query={query}
@@ -49,33 +39,26 @@ export function MarksStrip({ query, selectedId, onSelect, isAdmin }: MarksStripP
         emptyMessage="Марок пока нет"
         skeleton={<StripTilesSkeleton />}
       >
-        {(items) => {
-          const { items: preview, hasMore } = previewStrip(items, selectedId)
-          const visible = expanded ? items : preview
-          return (
-            <StripOrWrap expanded={expanded}>
-              <AdminAddTile isAdmin={isAdmin} to="/admin/new/mark" label="Новая марка" />
-              {visible.map((mark, index) => (
-                <MarkTile
-                  key={mark.id}
-                  mark={mark}
-                  selected={selectedId === mark.id}
-                  onSelect={onSelect}
-                  isAdmin={isAdmin}
-                  priority={index < 2}
-                  onEdit={() => setEditId(mark.id)}
-                  onDelete={() => {
-                    deleteMutation.reset()
-                    setDeleting(mark)
-                  }}
-                />
-              ))}
-              {!expanded && hasMore ? (
-                <ShowAllTile total={items.length} onClick={() => setExpanded(true)} />
-              ) : null}
-            </StripOrWrap>
-          )
-        }}
+        {(items) => (
+          <HorizontalScroller activeKey={selectedId}>
+            <AdminAddTile isAdmin={isAdmin} to="/admin/new/mark" label="Новая марка" />
+            {items.map((mark, index) => (
+              <MarkTile
+                key={mark.id}
+                mark={mark}
+                selected={selectedId === mark.id}
+                onSelect={onSelect}
+                isAdmin={isAdmin}
+                priority={index < 4}
+                onEdit={() => setEditId(mark.id)}
+                onDelete={() => {
+                  deleteMutation.reset()
+                  setDeleting(mark)
+                }}
+              />
+            ))}
+          </HorizontalScroller>
+        )}
       </QueryStatus>
       <EditMarkDialog
         mark={editing}
@@ -133,7 +116,7 @@ function MarkTile({
   const image = firstImageSrc(mark.images)
 
   return (
-    <div className="relative w-36 shrink-0">
+    <div className="relative w-36 shrink-0" data-strip-selected={selected ? 'true' : undefined}>
       <button
         type="button"
         onClick={() => onSelect(selected ? undefined : mark.id)}
