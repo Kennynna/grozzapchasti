@@ -35,7 +35,7 @@ export const site = {
     addressLocality: 'Грозный',
     addressRegion: 'Чеченская Республика',
     addressCountry: 'RU',
-    hours: 'Пн–Сб, 9:00–',
+    hours: 'Пн–Сб, 9:00–18:00',
   },
   geo: {
     region: 'RU-CE',

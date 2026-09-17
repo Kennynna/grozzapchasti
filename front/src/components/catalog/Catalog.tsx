@@ -242,7 +242,7 @@ export function CatalogPending({
             <h2 className="text-lg font-semibold">Модель</h2>
             <p className="text-sm text-muted-foreground">Выберите модель</p>
           </div>
-          <StripTilesSkeleton />
+          <StripTilesSkeleton rows={2} />
         </section>
       ) : null}
       {showGrid ? (

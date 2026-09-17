@@ -5,6 +5,7 @@ import { WhatsAppIcon } from '@/components/WhatsAppIcon'
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
@@ -24,17 +25,7 @@ export function MobileNav({ open, onOpenChange, isAdmin, onLogout }: MobileNavPr
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="left" className="w-72">
         <SheetHeader>
-          <SheetTitle>
-            <img
-              src={site.logo.src}
-              alt={site.name}
-              width={site.logo.width}
-              height={site.logo.height}
-              decoding="async"
-              className="h-10 w-auto object-contain"
-            />
-            <span className="sr-only">{site.name}</span>
-          </SheetTitle>
+          <SheetTitle className="sr-only">{site.name}</SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-4">
           {site.nav.map((item) => (
@@ -86,6 +77,23 @@ export function MobileNav({ open, onOpenChange, isAdmin, onLogout }: MobileNavPr
           </a>
           <p className="text-muted-foreground">{site.contacts.hours}</p>
         </div>
+
+        <SheetFooter className="items-center">
+          <Link
+            to="/"
+            className="inline-flex"
+            onClick={() => onOpenChange(false)}
+          >
+            <img
+              src={site.logo.src}
+              alt={site.name}
+              width={site.logo.width}
+              height={site.logo.height}
+              decoding="async"
+              className="h-10 w-auto object-contain"
+            />
+          </Link>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   )

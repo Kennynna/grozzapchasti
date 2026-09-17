@@ -7,14 +7,12 @@ import {
 } from '@/components/admin/lazy-dialogs'
 import { QueryStatus } from '@/components/QueryStatus'
 import { StripTilesSkeleton } from '@/components/query-skeletons'
-import { Button } from '@/components/ui/button'
-import { previewStrip } from '@/lib/catalog-strip'
 import { cn } from '@/lib/utils'
 import { firstImageSrc, useDeleteModelMutation, type Model } from '@/queries'
 import type { UseQueryResult } from '@tanstack/react-query'
 import { AdminAddTile } from './AdminAddTile'
 import { CardImage } from './CardImage'
-import { ShowAllTile, StripOrWrap } from './ShowAll'
+import { HorizontalScroller } from './HorizontalScroller'
 
 type ModelsStripProps = {
   query: UseQueryResult<Model[]>
@@ -34,21 +32,13 @@ export function ModelsStrip({
   const deleteMutation = useDeleteModelMutation()
   const [editId, setEditId] = useState<number>()
   const [deleting, setDeleting] = useState<Model>()
-  const [expanded, setExpanded] = useState(false)
   const editing = (query.data ?? []).find((item) => item.id === editId)
 
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">Модель</h2>
-          <p className="text-sm text-muted-foreground">Выберите модель</p>
-        </div>
-        {expanded ? (
-          <Button type="button" variant="ghost" size="sm" onClick={() => setExpanded(false)}>
-            Свернуть
-          </Button>
-        ) : null}
+      <div>
+        <h2 className="text-lg font-semibold">Модель</h2>
+        <p className="text-sm text-muted-foreground">Выберите модель</p>
       </div>
       <QueryStatus
         query={query}
@@ -56,16 +46,14 @@ export function ModelsStrip({
           items.filter((item) => item.markId === markId).length === 0 && !isAdmin
         }
         emptyMessage="Моделей этой марки нет"
-        skeleton={<StripTilesSkeleton />}
+        skeleton={<StripTilesSkeleton rows={2} />}
       >
         {(items) => {
           const ofMark = items.filter((item) => item.markId === markId)
-          const { items: preview, hasMore } = previewStrip(ofMark, selectedId)
-          const visible = expanded ? ofMark : preview
           return (
-            <StripOrWrap expanded={expanded}>
+            <HorizontalScroller rows={2} activeKey={selectedId}>
               <AdminAddTile isAdmin={isAdmin} to="/admin/new/model" label="Новая модель" />
-              {visible.map((model) => (
+              {ofMark.map((model) => (
                 <ModelTile
                   key={model.id}
                   model={model}
@@ -79,10 +67,7 @@ export function ModelsStrip({
                   }}
                 />
               ))}
-              {!expanded && hasMore ? (
-                <ShowAllTile total={ofMark.length} onClick={() => setExpanded(true)} />
-              ) : null}
-            </StripOrWrap>
+            </HorizontalScroller>
           )
         }}
       </QueryStatus>
@@ -140,7 +125,7 @@ function ModelTile({
   const image = firstImageSrc(model.images)
 
   return (
-    <div className="relative w-36 shrink-0">
+    <div className="relative w-36" data-strip-selected={selected ? 'true' : undefined}>
       <button
         type="button"
         onClick={() => onSelect(selected ? undefined : model.id)}
