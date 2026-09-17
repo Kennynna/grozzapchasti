@@ -30,6 +30,21 @@ export function validateCatalogSearch(search: Record<string, unknown>): CatalogS
   }
 }
 
+export function validateCatalogPageSearch(
+  search: Record<string, unknown>,
+): Pick<CatalogSearch, 'categoryId' | 'page'> {
+  const next: Pick<CatalogSearch, 'categoryId' | 'page'> = {}
+  const categoryId = parsePositiveInt(search.categoryId)
+  const page = parsePositiveInt(search.page)
+  if (categoryId) {
+    next.categoryId = categoryId
+  }
+  if (page) {
+    next.page = page
+  }
+  return next
+}
+
 export function compactCatalogSearch(search: CatalogSearch): CatalogSearch {
   const next: CatalogSearch = {}
   if (search.markId) {

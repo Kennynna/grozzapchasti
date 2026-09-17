@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { db } from '../prisma/db';
+import { partSlug, uniqueSlug } from './slug';
 
 function xmlEscape(value: string) {
   return value
@@ -64,9 +65,11 @@ function urlEntry(options: {
 export class SeoService {
   async buildSitemap() {
     const origin = siteOrigin();
-    const parts = await db.orm.public.SparePart.orderBy((part) =>
-      part.name.asc(),
-    ).all();
+    const [parts, marks, models] = await Promise.all([
+      db.orm.public.SparePart.orderBy((part) => part.name.asc()).all(),
+      db.orm.public.Mark.orderBy((mark) => mark.name.asc()).all(),
+      db.orm.public.Model.orderBy((model) => model.name.asc()).all(),
+    ]);
 
     const urls = [
       urlEntry({
@@ -75,13 +78,40 @@ export class SeoService {
         priority: '1.0',
       }),
       urlEntry({
+        loc: `${origin}/catalog`,
+        changefreq: 'weekly',
+        priority: '0.9',
+      }),
+      urlEntry({
         loc: `${origin}/contacts`,
         changefreq: 'monthly',
         priority: '0.6',
       }),
+      ...marks.map((mark) =>
+        urlEntry({
+          loc: `${origin}/catalog/${uniqueSlug(mark.name, mark.id, marks)}`,
+          lastmod: lastmod(mark.updatedAt),
+          changefreq: 'weekly',
+          priority: '0.7',
+        }),
+      ),
+      ...models.map((model) => {
+        const mark = marks.find((item) => item.id === model.markId);
+        if (!mark) {
+          return undefined;
+        }
+        const markSlug = uniqueSlug(mark.name, mark.id, marks);
+        const ofMark = models.filter((item) => item.markId === model.markId);
+        return urlEntry({
+          loc: `${origin}/catalog/${markSlug}/${uniqueSlug(model.name, model.id, ofMark)}`,
+          lastmod: lastmod(model.updatedAt),
+          changefreq: 'weekly',
+          priority: '0.7',
+        });
+      }).filter((entry): entry is string => Boolean(entry)),
       ...parts.map((part) =>
         urlEntry({
-          loc: `${origin}/parts/${part.id}`,
+          loc: `${origin}/parts/${partSlug(part)}`,
           lastmod: lastmod(part.updatedAt),
           changefreq: 'weekly',
           priority: '0.8',

@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 import { AdminKebab } from '@/components/admin/AdminKebab'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/format'
+import { partSlug } from '@/lib/slug'
 import { cn } from '@/lib/utils'
 import { firstImageSrc, type SparePart } from '@/queries'
 import { selectCartQuantity, useCartStore, useFavoritesStore } from '@/stores'
@@ -42,7 +43,7 @@ export function SparePartCard({
       <div className="relative">
         <Link
           to="/parts/$partId"
-          params={{ partId: part.id }}
+          params={{ partId: partSlug(part) }}
           className="block"
           aria-label={part.name}
         >
@@ -92,7 +93,7 @@ export function SparePartCard({
       </div>
       <Link
         to="/parts/$partId"
-        params={{ partId: part.id }}
+        params={{ partId: partSlug(part) }}
         className="flex flex-1 flex-col gap-0.5 p-3 md:gap-1 md:p-4"
       >
         <h3 className="line-clamp-2 min-h-10 font-heading text-sm font-semibold leading-snug md:min-h-12 md:text-base">

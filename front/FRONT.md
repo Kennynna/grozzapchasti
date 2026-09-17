@@ -32,11 +32,14 @@
 - [x] Контакты и копирайт
   - `src/config/site.ts` — статика витрины, не с бэка
 - [x] SEO для роботов
-  - `src/lib/seo.ts` — title/description/canonical/og/twitter/geo, JSON-LD магазина, FAQ, каталога и товара
-  - `index.html` — статичные meta + JSON-LD + `<noscript>` для краулеров без JS
+  - `src/lib/seo.ts` — title/description/canonical/og/twitter/geo/ICBM, JSON-LD магазина, FAQ, каталога и товара; ЧПУ в ссылках Product/ItemList
+  - `index.html` — статичные meta + JSON-LD + `<noscript>` с адресом и ссылкой на `/catalog`
   - `public/robots.txt` — Disallow `/admin` и `/cart`, Clean-param фильтров, Host и Sitemap для Яндекса
-  - `public/sitemap.xml` — индекс на `GET /api/sitemap.xml` (карточки с бэка)
+  - `public/sitemap.xml` — индекс на `GET /api/sitemap.xml` (главная, каталог по марке/модели, карточки с ЧПУ)
   - `/cart`, `/admin/*`, 404 и ошибки — `noindex, nofollow`
+  - ЧПУ: `src/lib/slug.ts`, `src/lib/catalog-path.ts` — `/catalog/{mark}/{model}`, `/parts/{id}-{slug}`
+  - Регион: `site.contacts.postalCode`, `site.geo.latitude/longitude`, PostalAddress + GeoCoordinates
+  - Яндекс.Вебмастер (не код): добавить сайт, карту `https://grozzapchasti.ru/sitemap.xml`, регион «Грозный», карточку в Яндекс Бизнесе, при желании Метрику и код `site.yandexVerification`
 - [x] Моки выкинуты
   - `src/config/constants.ts` — только `API_URL`
 
@@ -49,7 +52,7 @@
 1. **Роутер: TanStack Router** (file-based). Уже есть TanStack Query — тот же стек, типизированные URL и search-params для фильтров каталога. Не React Router.
 2. **Корзина / избранное: zustand + persist.** Сторы: `src/stores/cart.ts`, `src/stores/favorites.ts`. JWT админа — `sessionStorage` (`queries/auth-token.ts`), не localStorage.
 3. **Тема: светлая всегда.** Палитра и Manrope — `design.md`. Не тёмная тема, не `prefers-color-scheme`, тумблера нет.
-4. **Фильтры каталога на клиенте.** На `/` источник правды — search-params: `markId`, `modelId`, `categoryId`, `page`. Persist (`src/stores/catalog.ts`) хранит марку / модель / категорию, чтобы вернуться с `/cart` без query. Пустой URL после гидрации один раз заполняется из стора. Смена марки сбрасывает модель. Смена фильтров сбрасывает `page`. Поиска по тексту и фильтра по цене нет. Сетка запчастей — по 14 на страницу.
+4. **Фильтры каталога на клиенте.** Индексируемые страницы — ЧПУ: `/catalog`, `/catalog/$markSlug`, `/catalog/$markSlug/$modelSlug`. `categoryId` и `page` остаются search-params. Старые `/?markId=&modelId=` редиректят на ЧПУ. Persist (`src/stores/catalog.ts`) хранит марку / модель / категорию, чтобы вернуться с `/cart`. Пустой `/` после гидрации один раз заполняется из стора (уходит на ЧПУ). Смена марки сбрасывает модель. Смена фильтров сбрасывает `page`. Поиска по тексту и фильтра по цене нет. Сетка запчастей — по 14 на страницу.
 5. **Админские кнопки только UI.** Мутации всё равно с JWT; без токена бэк ответит 401.
 6. **Моки в `config/constants.ts` удалить**, данные только с API (`src/queries/`).
 7. **Артикул на карточке** — `SparePart.article: string | null`. При создании необязателен. Unique, если задан. На карточке слот под артикул и марку всегда одной высоты: без артикула строка пустая, карточки не прыгают.
@@ -60,8 +63,11 @@
 
 | путь | кто | что |
 |---|---|---|
-| `/` | все | Hero + ленты марок / моделей / категорий + сетка запчастей + фильтры |
-| `/parts/$partId` | все | Карточка запчасти: галерея, описание, в корзину / Telegram |
+| `/` | все | Hero + каталог на главной + как заказать + гарантии |
+| `/catalog` | все | Каталог: ленты марок / моделей / категорий + сетка |
+| `/catalog/$markSlug` | все | Каталог марки |
+| `/catalog/$markSlug/$modelSlug` | все | Каталог модели |
+| `/parts/$partId` | все | Карточка запчасти: `/parts/{id}-{slug}` |
 | `/contacts` | все | Телефон, адрес, часы, Telegram — из `src/config/site.ts` |
 | `/cart` | все | Корзина из zustand |
 | `/admin/login` | скрытая | Логин. В нав не ставить |
@@ -78,7 +84,7 @@
 
 ## Нав
 
-Шапка: логотип, Каталог (`/#catalog`), Контакты, иконки избранного и корзины (счётчики), на мобиле — burger. Поиска в шапке и в каталоге нет. На мобилке логотип только внизу burger-sheet по центру (широкий wordmark не влезает рядом с иконками); клик по нему ведёт на `/`.
+Шапка: логотип, Каталог (`/catalog`), Контакты, иконки избранного и корзины (счётчики), на мобиле — burger. Поиска в шапке и в каталоге нет. На мобилке логотип только внизу burger-sheet по центру (широкий wordmark не влезает рядом с иконками); клик по нему ведёт на `/`.
 
 Админ в шапке не светим. После логина — мелкий индикатор + выход, без пункта «Админка».
 
@@ -87,7 +93,7 @@
 Порядок блоков:
 
 1. Hero: `src/components/home/HomeHero.tsx` — «Премиальные автозапчасти», схема тормозного диска, сетка, CTA «Перейти в каталог».
-2. Лента **марок** — один ряд, горизонтальный скролл с видимым скроллбаром. Клик = фильтр `markId`. Для админа первая плитка — `+` → `/admin/new/mark`.
+2. Лента **марок** — один ряд, горизонтальный скролл с видимым скроллбаром. Клик = переход на `/catalog/{mark}`. Для админа первая плитка — `+` → `/admin/new/mark`.
 3. Лента **моделей** — два ряда и скролл (`HorizontalScroller` `rows={2}`). Только если выбрана марка, иначе блок не рендерим. Только модели этой марки. Админ: `+` → `/admin/new/model`.
 4. Лента **категорий** и сетка **запчастей** — если выбраны марка **и** модель. Иначе пользователю нечего показывать. Админ: `+` у категории и запчасти появляются вместе с этими блоками.
 
@@ -95,11 +101,11 @@
 
 ### Карточка запчасти
 
-Клик по фото/имени → `/parts/$partId`. Фото, название, марка, артикул (если есть), цена (бронза). Иконки: избранное (сердце) и корзина (`+` если нет в корзине, галочка если уже есть). Для админа — кебаб сверху слева: «Редактировать» / «Удалить».
+Клик по фото/имени → `/parts/{id}-{slug}`. Фото, название, марка, артикул (если есть), цена (бронза). Иконки: избранное (сердце) и корзина (`+` если нет в корзине, галочка если уже есть). Для админа — кебаб сверху слева: «Редактировать» / «Удалить».
 
 ### Страница запчасти
 
-`/parts/$partId`: галерея до 3 фото, хлебные крошки-ссылки в каталог (`/?markId=&modelId=#catalog`), описание, копирование артикула, в корзину (`+` / галочка) / избранное / скопировать заказ + открыть Telegram. Ниже — «Возможно, вам понадобится»: горизонтальная лента с зацикленным скроллом (`SuggestedPartsStrip`). Нет записи → `notFound`.
+`/parts/{id}-{slug}`: галерея до 3 фото, хлебные крошки-ссылки в каталог (`/catalog/...`), описание, копирование артикула, в корзину (`+` / галочка) / избранное / скопировать заказ + открыть Telegram. Ниже — «Возможно, вам понадобится»: горизонтальная лента с зацикленным скроллом (`SuggestedPartsStrip`). Нет записи → `notFound`. Старый `/parts/1` редиректит на ЧПУ.
 
 Карточки марки / модели / категории проще: фото или имя, выбранное состояние, тот же кебаб у админа. У категории фото нет — только имя.
 
@@ -255,7 +261,8 @@ front/src/
    - `src/queries/auth.ts` — `useIsAdmin()` = JWT + `useMeQuery` ok
    - Главная пока рендерит старые `Marks.root` / `Models.root` / `Zapchasti.root` — заменить на шаге 3
 3. [x] Главная на API: ленты, фильтры в search-params, сетка, пустые состояния.
-   - `src/routes/index.tsx` — `validateSearch` (`markId`, `modelId`, `categoryId`, `page`); `#catalog` — `min-h-[calc(100svh-4rem)]` под sticky-шапку `h-16`; `pendingMs: 0` + `HomePending` (hero + `CatalogPending`) пока loader качает списки
+   - `src/routes/index.tsx` — `validateSearch` для старых `markId`/`modelId` (редирект на ЧПУ); `#catalog` — `min-h-[calc(100svh-4rem)]` под sticky-шапку; `pendingMs: 0` + `HomePending`
+   - `src/routes/catalog.tsx`, `catalog.index.tsx`, `catalog.$markSlug.tsx`, `catalog.$markSlug.index.tsx`, `catalog.$markSlug.$modelSlug.tsx` — ЧПУ каталога `/catalog/{mark}/{model}`
    - `src/components/home/HomeHero.tsx` — hero главной: схема диска, техническая сетка, три подписи из `site.heroHighlights`
    - `src/lib/catalog-search.ts` — парсинг URL (марка / модель / категория / `page`); `CATALOG_PAGE_SIZE = 14`
    - `src/stores/catalog.ts` — persist выбранных марки / модели / категории
@@ -316,18 +323,18 @@ front/src/
     - `index.html` — preload логотипа и скелетон шапки до гидрации; `src/index.css` — Manrope только cyrillic + latin
     - логотип: `public/logo.webp`, размеры в `site.logo`
 11. [x] Шаринг фильтров. Чипы выбранного авто и слайдер цены не показываем — выбор виден на лентах.
-    - На `/` марка/модель/категория/`page` живут в URL (`catalog-search.ts`). Persist стора — запас, если пришли на `/` без query
+    - На `/` и `/catalog/*` марка/модель живут в пути, категория/`page` — в query (`catalog-search.ts`, `catalog-path.ts`). Persist стора — запас, если пришли на `/` без выбора
     - `Catalog` пишет и URL, и стор в `patchCatalog`. `PriceFilter.tsx` удалён, `priceMin`/`priceMax` из URL убраны
 12. [x] Поиск по имени и артикулу — **снят**. Поля нет, `q` из URL убран. `CatalogSearchField.tsx` удалён. Сетка только при марке и модели.
 13. [x] Страница запчасти + галерея.
-    - `src/routes/parts.$partId.tsx` — `/parts/$partId`, loader `sparePartsQueries.detail`, 404 → `notFound`; `pendingMs: 0` + `PartPagePending` (`ProductPageSkeleton`)
+    - `src/routes/parts.$partId.tsx` — `/parts/{id}-{slug}`, loader `sparePartsQueries.detail`, 404 → `notFound`; `pendingMs: 0` + `PartPagePending` (`ProductPageSkeleton`)
     - `src/components/catalog/ImageGallery.tsx` — до 3 фото, стрелки и превью
     - Карточка/корзина/избранное ведут на страницу. Артикул копируется. Telegram — `TelegramOrderActions`
     - На карточке `+` / галочка вместо сумки с бейджем (`SparePartCard`)
     - шаг 16: те же `+` / галочка на странице товара; крошки ведут в каталог с фильтрами; блок «Возможно, вам понадобится»
 14. [x] Hero, контакты Telegram, 404, meta.
     - Hero — `src/components/home/HomeHero.tsx` (схема диска + `site.heroHighlights`); CTA только «Перейти в каталог»
-    - `site.description` + meta на `/`, `/contacts`, `/cart`, `/parts/$partId`; `index.html`; JSON-LD AutoPartsStore / Product / FAQ / ItemList; живой sitemap карточек — `GET /api/sitemap.xml`
+    - `site.description` + meta на `/`, `/catalog`, `/contacts`, `/cart`, `/parts/$partId`; `index.html`; JSON-LD AutoPartsStore / Product / FAQ / ItemList; живой sitemap — `GET /api/sitemap.xml` (каталог + ЧПУ карточек)
     - `/contacts` и футер — ссылка на `t.me/<username>`
     - `__root.tsx` `notFoundComponent` — «Страница не найдена»
 15. [x] Применимость запчасти: эта модель / вся марка / все авто.
@@ -339,7 +346,7 @@ front/src/
     - `src/components/catalog/CardImage.tsx` — плейсхолдер без фото и при `onError`; сброс ошибки при смене `src`
     - `src/components/catalog/ImageGallery.tsx` — тот же плейсхолдер на главном фото и превью
     - `src/components/catalog/SparePartsGrid.tsx` — проп `models`, подпись применимости с моделью
-    - `src/routes/parts.$partId.tsx` — `Plus`/`Check` как на карточке; крошки-`Link` в `/?markId=&modelId=#catalog`; `relatedPartsFor` (до 6)
+    - `src/routes/parts.$partId.tsx` — `Plus`/`Check` как на карточке; крошки-`Link` в `/catalog/{mark}/{model}`; `relatedPartsFor` (до 6)
     - `src/lib/format.ts` — `relatedPartsFor` (точное авто + универсальные / марка / категория)
     - «Возможно, вам понадобится» на главной и на `/parts/$partId` — `SuggestedPartsStrip` (зацикленный горизонтальный скролл)
     - `src/components/layout/FavoritesSheet.tsx` — клик по товару закрывает sheet

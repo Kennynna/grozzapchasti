@@ -58,16 +58,18 @@ export function Header() {
         </Link>
 
         <nav className="ml-3 hidden items-center gap-6 text-sm md:flex">
-          {site.nav.map((item) => (
-            <Link
-              key={item.label}
-              to={item.to}
-              hash={'hash' in item ? item.hash : undefined}
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              {item.label}
-            </Link>
-          ))}
+          <Link
+            to="/catalog"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Каталог
+          </Link>
+          <Link
+            to="/contacts"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Контакты
+          </Link>
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-1">

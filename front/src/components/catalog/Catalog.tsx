@@ -1,11 +1,20 @@
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useNavigate, useRouterState, useSearch } from '@tanstack/react-router'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { JsonLd } from '@/components/JsonLd'
+import { CatalogPolyhedron } from '@/components/layout/ScatteredParts'
+import {
+  CatalogPartsSkeleton,
+  CategoryChipsSkeleton,
+  StripTilesSkeleton,
+} from '@/components/query-skeletons'
+import { catalogNav, catalogPath, findMarkBySlug, findModelBySlug } from '@/lib/catalog-path'
 import {
   compactCatalogSearch,
   paginateCatalog,
   type CatalogSearch,
 } from '@/lib/catalog-search'
 import { catalogPartsForView } from '@/lib/format'
+import { breadcrumbJsonLd, catalogJsonLd } from '@/lib/seo'
 import {
   useCategoriesQuery,
   useIsAdmin,
@@ -14,20 +23,21 @@ import {
   useSparePartsQuery,
 } from '@/queries'
 import { useCatalogHydrated, useCatalogStore } from '@/stores'
-import { CatalogPolyhedron } from '@/components/layout/ScatteredParts'
-import {
-  CatalogPartsSkeleton,
-  CategoryChipsSkeleton,
-  StripTilesSkeleton,
-} from '@/components/query-skeletons'
 import { CategoryChips } from './CategoryChips'
 import { MarksStrip } from './MarksStrip'
 import { ModelsStrip } from './ModelsStrip'
 import { SparePartsGrid } from './SparePartsGrid'
 
-export function Catalog() {
-  const search = useSearch({ from: '/' })
-  const navigate = useNavigate({ from: '/' })
+type CatalogProps = {
+  markSlug?: string
+  modelSlug?: string
+  showHeading?: boolean
+}
+
+export function Catalog({ markSlug, modelSlug, showHeading = false }: CatalogProps = {}) {
+  const navigate = useNavigate()
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const search = useSearch({ strict: false }) as CatalogSearch
   const isAdmin = useIsAdmin()
   const catalogHydrated = useCatalogHydrated()
   const hydratedFromStore = useRef(false)
@@ -39,8 +49,11 @@ export function Catalog() {
 
   const parts = partsQuery.data
   const marks = marksQuery.data ?? []
-  const markId = search.markId
-  const modelId = search.modelId
+  const models = modelsQuery.data ?? []
+  const mark = markSlug ? findMarkBySlug(marks, markSlug) : undefined
+  const model = mark && modelSlug ? findModelBySlug(models, mark.id, modelSlug) : undefined
+  const markId = mark?.id
+  const modelId = model?.id
   const categoryId = search.categoryId
   const carReady = Boolean(markId && modelId)
   const showGrid = carReady
@@ -58,86 +71,115 @@ export function Catalog() {
   )
   const paged = paginateCatalog(visibleParts, search.page)
 
+  const patchCatalog = useCallback(
+    (patch: Partial<CatalogSearch>) => {
+      const next = compactCatalogSearch({
+        markId,
+        modelId,
+        categoryId,
+        page: search.page,
+        ...patch,
+        ...('page' in patch ? {} : { page: undefined }),
+      })
+      const nextMark = marks.find((item) => item.id === next.markId)
+      const nextModel = models.find((item) => item.id === next.modelId)
+      replaceSelection({
+        markId: next.markId,
+        modelId: next.modelId,
+        categoryId: next.categoryId,
+      })
+      const nav = catalogNav({
+        mark: nextMark,
+        model: nextMark ? nextModel : undefined,
+        marks,
+        models,
+        categoryId: next.categoryId,
+        page: next.page,
+      })
+      if (!nextMark && pathname === '/') {
+        void navigate({
+          to: '/',
+          search: {},
+          hash: 'catalog',
+          replace: true,
+          resetScroll: false,
+        })
+        return
+      }
+      void navigate({
+        to: nav.to,
+        params: nav.params,
+        search: nav.search ?? {},
+        replace: true,
+        resetScroll: false,
+        hashScrollIntoView: 'page' in patch,
+      } as never)
+    },
+    [
+      categoryId,
+      markId,
+      marks,
+      modelId,
+      models,
+      navigate,
+      pathname,
+      replaceSelection,
+      search.page,
+    ],
+  )
+
   useEffect(() => {
     if (!catalogHydrated || hydratedFromStore.current) {
       return
     }
     hydratedFromStore.current = true
-    if (search.markId || search.modelId || search.categoryId) {
+    if (markId || modelId || categoryId || search.markId || search.modelId) {
       replaceSelection({
-        markId: search.markId,
-        modelId: search.modelId,
-        categoryId: search.categoryId,
+        markId: markId ?? search.markId,
+        modelId: modelId ?? search.modelId,
+        categoryId,
       })
+      return
+    }
+    if (pathname !== '/') {
       return
     }
     const stored = useCatalogStore.getState()
     if (!stored.markId && !stored.modelId && !stored.categoryId) {
       return
     }
-    void navigate({
-      search: (prev) =>
-        compactCatalogSearch({
-          ...prev,
-          markId: stored.markId,
-          modelId: stored.modelId,
-          categoryId: stored.categoryId,
-        }),
-      replace: true,
-      resetScroll: false,
+    patchCatalog({
+      markId: stored.markId,
+      modelId: stored.modelId,
+      categoryId: stored.categoryId,
     })
   }, [
     catalogHydrated,
-    navigate,
-    replaceSelection,
     search.categoryId,
     search.markId,
     search.modelId,
+    patchCatalog,
+    pathname,
+    replaceSelection,
   ])
 
-  const patchCatalog = useCallback(
-    (patch: Partial<CatalogSearch>) => {
-      const next = compactCatalogSearch({
-        ...search,
-        ...patch,
-        ...('page' in patch ? {} : { page: undefined }),
-      })
-      replaceSelection({
-        markId: next.markId,
-        modelId: next.modelId,
-        categoryId: next.categoryId,
-      })
-      void navigate({
-        search: next,
-        hash: 'catalog',
-        replace: true,
-        resetScroll: false,
-        hashScrollIntoView: 'page' in patch,
-      })
-    },
-    [navigate, replaceSelection, search],
-  )
-
   useEffect(() => {
-    if (!markId || !marksQuery.data) {
+    if (!markSlug || !marksQuery.data) {
       return
     }
-    if (!marksQuery.data.some((mark) => mark.id === markId)) {
+    if (!mark) {
       patchCatalog({ markId: undefined, modelId: undefined })
     }
-  }, [markId, marksQuery.data, patchCatalog])
+  }, [mark, markSlug, marksQuery.data, patchCatalog])
 
   useEffect(() => {
-    if (!modelId || !markId || !modelsQuery.data) {
+    if (!modelSlug || !markId || !modelsQuery.data) {
       return
     }
-    const belongs = modelsQuery.data.some(
-      (model) => model.id === modelId && model.markId === markId,
-    )
-    if (!belongs) {
+    if (!model) {
       patchCatalog({ modelId: undefined })
     }
-  }, [markId, modelId, modelsQuery.data, patchCatalog])
+  }, [markId, model, modelSlug, modelsQuery.data, patchCatalog])
 
   useEffect(() => {
     if (!categoryId || !categoriesQuery.data) {
@@ -158,6 +200,20 @@ export function Catalog() {
   return (
     <div className="relative flex flex-1 flex-col">
       <div className="relative z-10 flex-1 space-y-10">
+        {showHeading ? (
+          <div className="space-y-2">
+            <h1 className="text-2xl md:text-3xl">
+              {mark && model
+                ? `Запчасти ${mark.name} ${model.name}`
+                : mark
+                  ? `Запчасти ${mark.name}`
+                  : 'Каталог автозапчастей'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Оригинальные и проверенные компоненты. Подбор в Грозном и по Чеченской Республике.
+            </p>
+          </div>
+        ) : null}
         {showGrid ? null : <CatalogPolyhedron />}
         <MarksStrip
         query={marksQuery}
@@ -211,8 +267,43 @@ export function Catalog() {
           />
         </>
       ) : null}
+      {showHeading ? (
+        <>
+          {parts && parts.length > 0 ? (
+            <JsonLd data={catalogJsonLd(showGrid ? visibleParts : parts)} />
+          ) : null}
+          <JsonLd
+            data={breadcrumbJsonLd([
+              { name: 'Каталог', path: '/catalog' },
+              ...(mark
+                ? [{ name: mark.name, path: catalogPath({ mark, marks }) }]
+                : []),
+              ...(mark && model
+                ? [{ name: model.name, path: catalogPath({ mark, model, marks, models }) }]
+                : []),
+            ])}
+          />
+        </>
+      ) : null}
       </div>
     </div>
+  )
+}
+
+export function CatalogSection({
+  markSlug,
+  modelSlug,
+}: {
+  markSlug?: string
+  modelSlug?: string
+}) {
+  return (
+    <section
+      id="catalog"
+      className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
+    >
+      <Catalog markSlug={markSlug} modelSlug={modelSlug} showHeading />
+    </section>
   )
 }
 

@@ -5,7 +5,7 @@ import { WhatsAppIcon } from '@/components/WhatsAppIcon'
 import { site } from '@/config/site'
 import { telHref } from '@/lib/format'
 import { whatsappChatHref } from '@/lib/order-message'
-import { canonical, pageMeta, storeJsonLd } from '@/lib/seo'
+import { canonical, pageMeta, storeJsonLd, yandexMapsUrl } from '@/lib/seo'
 
 export const Route = createFileRoute('/contacts')({
   head: () => ({
@@ -61,7 +61,7 @@ function ContactsPage() {
           <div className="mt-4 rounded-md overflow-hidden border">
             <iframe
               title="Яндекс.Карта — адрес"
-              src={`https://yandex.ru/map-widget/v1/?text=${encodeURIComponent(address as string)}`}
+              src={`https://yandex.ru/map-widget/v1/?ll=${site.geo.longitude},${site.geo.latitude}&z=16&pt=${site.geo.longitude},${site.geo.latitude}`}
               width="100%"
               height={360}
               loading="lazy"
@@ -69,7 +69,7 @@ function ContactsPage() {
             />
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            Нажмите <a className="text-primary underline" href={`https://yandex.ru/maps/?text=${encodeURIComponent(address as string)}`} target="_blank" rel="noreferrer">Открыть в Яндекс.Картах</a> для детальной карты.
+            Нажмите <a className="text-primary underline" href={yandexMapsUrl()} target="_blank" rel="noreferrer">Открыть в Яндекс.Картах</a> для детальной карты.
           </p>
         </div>
         <div>

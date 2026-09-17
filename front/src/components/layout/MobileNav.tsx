@@ -28,17 +28,20 @@ export function MobileNav({ open, onOpenChange, isAdmin, onLogout }: MobileNavPr
           <SheetTitle className="sr-only">{site.name}</SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-1 px-4">
-          {site.nav.map((item) => (
-            <Link
-              key={item.label}
-              to={item.to}
-              hash={'hash' in item ? item.hash : undefined}
-              className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-              onClick={() => onOpenChange(false)}
-            >
-              {item.label}
-            </Link>
-          ))}
+          <Link
+            to="/catalog"
+            className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => onOpenChange(false)}
+          >
+            Каталог
+          </Link>
+          <Link
+            to="/contacts"
+            className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => onOpenChange(false)}
+          >
+            Контакты
+          </Link>
           <Link
             to="/cart"
             className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"

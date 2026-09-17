@@ -59,7 +59,7 @@ function NotFound() {
         Такой страницы нет. Вернитесь в каталог и выберите запчасть.
       </p>
       <Button className="mt-6" variant="outline" asChild>
-        <Link to="/" hash="catalog">
+        <Link to="/catalog">
           В каталог
         </Link>
       </Button>

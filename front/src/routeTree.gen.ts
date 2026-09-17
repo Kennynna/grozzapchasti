@@ -11,14 +11,19 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as CatalogRouteImport } from './routes/catalog'
 import { Route as ContactsRouteImport } from './routes/contacts'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminNewRouteImport } from './routes/admin.new'
+import { Route as CatalogIndexRouteImport } from './routes/catalog.index'
+import { Route as CatalogMarkSlugRouteImport } from './routes/catalog.$markSlug'
 import { Route as PartsPartIdRouteImport } from './routes/parts.$partId'
 import { Route as AdminNewCategoryRouteImport } from './routes/admin.new.category'
 import { Route as AdminNewMarkRouteImport } from './routes/admin.new.mark'
 import { Route as AdminNewModelRouteImport } from './routes/admin.new.model'
 import { Route as AdminNewPartRouteImport } from './routes/admin.new.part'
+import { Route as CatalogMarkSlugIndexRouteImport } from './routes/catalog.$markSlug.index'
+import { Route as CatalogMarkSlugModelSlugRouteImport } from './routes/catalog.$markSlug.$modelSlug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,6 +33,11 @@ const IndexRoute = IndexRouteImport.update({
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogRoute = CatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactsRoute = ContactsRouteImport.update({
@@ -44,6 +54,16 @@ const AdminNewRoute = AdminNewRouteImport.update({
   id: '/admin/new',
   path: '/admin/new',
   getParentRoute: () => rootRouteImport,
+} as any)
+const CatalogIndexRoute = CatalogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CatalogRoute,
+} as any)
+const CatalogMarkSlugRoute = CatalogMarkSlugRouteImport.update({
+  id: '/$markSlug',
+  path: '/$markSlug',
+  getParentRoute: () => CatalogRoute,
 } as any)
 const PartsPartIdRoute = PartsPartIdRouteImport.update({
   id: '/parts/$partId',
@@ -70,18 +90,34 @@ const AdminNewPartRoute = AdminNewPartRouteImport.update({
   path: '/part',
   getParentRoute: () => AdminNewRoute,
 } as any)
+const CatalogMarkSlugIndexRoute = CatalogMarkSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CatalogMarkSlugRoute,
+} as any)
+const CatalogMarkSlugModelSlugRoute =
+  CatalogMarkSlugModelSlugRouteImport.update({
+    id: '/$modelSlug',
+    path: '/$modelSlug',
+    getParentRoute: () => CatalogMarkSlugRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
+  '/catalog': typeof CatalogRouteWithChildren
   '/contacts': typeof ContactsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRouteWithChildren
+  '/catalog/$markSlug': typeof CatalogMarkSlugRouteWithChildren
   '/parts/$partId': typeof PartsPartIdRoute
+  '/catalog/': typeof CatalogIndexRoute
   '/admin/new/category': typeof AdminNewCategoryRoute
   '/admin/new/mark': typeof AdminNewMarkRoute
   '/admin/new/model': typeof AdminNewModelRoute
   '/admin/new/part': typeof AdminNewPartRoute
+  '/catalog/$markSlug/$modelSlug': typeof CatalogMarkSlugModelSlugRoute
+  '/catalog/$markSlug/': typeof CatalogMarkSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -90,37 +126,50 @@ export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRouteWithChildren
   '/parts/$partId': typeof PartsPartIdRoute
+  '/catalog': typeof CatalogIndexRoute
   '/admin/new/category': typeof AdminNewCategoryRoute
   '/admin/new/mark': typeof AdminNewMarkRoute
   '/admin/new/model': typeof AdminNewModelRoute
   '/admin/new/part': typeof AdminNewPartRoute
+  '/catalog/$markSlug/$modelSlug': typeof CatalogMarkSlugModelSlugRoute
+  '/catalog/$markSlug': typeof CatalogMarkSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cart': typeof CartRoute
+  '/catalog': typeof CatalogRouteWithChildren
   '/contacts': typeof ContactsRoute
   '/admin/login': typeof AdminLoginRoute
   '/admin/new': typeof AdminNewRouteWithChildren
+  '/catalog/$markSlug': typeof CatalogMarkSlugRouteWithChildren
   '/parts/$partId': typeof PartsPartIdRoute
+  '/catalog/': typeof CatalogIndexRoute
   '/admin/new/category': typeof AdminNewCategoryRoute
   '/admin/new/mark': typeof AdminNewMarkRoute
   '/admin/new/model': typeof AdminNewModelRoute
   '/admin/new/part': typeof AdminNewPartRoute
+  '/catalog/$markSlug/$modelSlug': typeof CatalogMarkSlugModelSlugRoute
+  '/catalog/$markSlug/': typeof CatalogMarkSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/cart'
+    | '/catalog'
     | '/contacts'
     | '/admin/login'
     | '/admin/new'
+    | '/catalog/$markSlug'
     | '/parts/$partId'
+    | '/catalog/'
     | '/admin/new/category'
     | '/admin/new/mark'
     | '/admin/new/model'
     | '/admin/new/part'
+    | '/catalog/$markSlug/$modelSlug'
+    | '/catalog/$markSlug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -129,27 +178,36 @@ export interface FileRouteTypes {
     | '/admin/login'
     | '/admin/new'
     | '/parts/$partId'
+    | '/catalog'
     | '/admin/new/category'
     | '/admin/new/mark'
     | '/admin/new/model'
     | '/admin/new/part'
+    | '/catalog/$markSlug/$modelSlug'
+    | '/catalog/$markSlug'
   id:
     | '__root__'
     | '/'
     | '/cart'
+    | '/catalog'
     | '/contacts'
     | '/admin/login'
     | '/admin/new'
+    | '/catalog/$markSlug'
     | '/parts/$partId'
+    | '/catalog/'
     | '/admin/new/category'
     | '/admin/new/mark'
     | '/admin/new/model'
     | '/admin/new/part'
+    | '/catalog/$markSlug/$modelSlug'
+    | '/catalog/$markSlug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CartRoute: typeof CartRoute
+  CatalogRoute: typeof CatalogRouteWithChildren
   ContactsRoute: typeof ContactsRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AdminNewRoute: typeof AdminNewRouteWithChildren
@@ -172,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/catalog': {
+      id: '/catalog'
+      path: '/catalog'
+      fullPath: '/catalog'
+      preLoaderRoute: typeof CatalogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contacts': {
       id: '/contacts'
       path: '/contacts'
@@ -192,6 +257,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/new'
       preLoaderRoute: typeof AdminNewRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/catalog/': {
+      id: '/catalog/'
+      path: '/'
+      fullPath: '/catalog/'
+      preLoaderRoute: typeof CatalogIndexRouteImport
+      parentRoute: typeof CatalogRoute
+    }
+    '/catalog/$markSlug': {
+      id: '/catalog/$markSlug'
+      path: '/$markSlug'
+      fullPath: '/catalog/$markSlug'
+      preLoaderRoute: typeof CatalogMarkSlugRouteImport
+      parentRoute: typeof CatalogRoute
     }
     '/parts/$partId': {
       id: '/parts/$partId'
@@ -228,8 +307,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNewPartRouteImport
       parentRoute: typeof AdminNewRoute
     }
+    '/catalog/$markSlug/': {
+      id: '/catalog/$markSlug/'
+      path: '/'
+      fullPath: '/catalog/$markSlug/'
+      preLoaderRoute: typeof CatalogMarkSlugIndexRouteImport
+      parentRoute: typeof CatalogMarkSlugRoute
+    }
+    '/catalog/$markSlug/$modelSlug': {
+      id: '/catalog/$markSlug/$modelSlug'
+      path: '/$modelSlug'
+      fullPath: '/catalog/$markSlug/$modelSlug'
+      preLoaderRoute: typeof CatalogMarkSlugModelSlugRouteImport
+      parentRoute: typeof CatalogMarkSlugRoute
+    }
   }
 }
+
+interface CatalogMarkSlugRouteChildren {
+  CatalogMarkSlugModelSlugRoute: typeof CatalogMarkSlugModelSlugRoute
+  CatalogMarkSlugIndexRoute: typeof CatalogMarkSlugIndexRoute
+}
+
+const CatalogMarkSlugRouteChildren: CatalogMarkSlugRouteChildren = {
+  CatalogMarkSlugModelSlugRoute: CatalogMarkSlugModelSlugRoute,
+  CatalogMarkSlugIndexRoute: CatalogMarkSlugIndexRoute,
+}
+
+const CatalogMarkSlugRouteWithChildren = CatalogMarkSlugRoute._addFileChildren(
+  CatalogMarkSlugRouteChildren,
+)
+
+interface CatalogRouteChildren {
+  CatalogMarkSlugRoute: typeof CatalogMarkSlugRouteWithChildren
+  CatalogIndexRoute: typeof CatalogIndexRoute
+}
+
+const CatalogRouteChildren: CatalogRouteChildren = {
+  CatalogMarkSlugRoute: CatalogMarkSlugRouteWithChildren,
+  CatalogIndexRoute: CatalogIndexRoute,
+}
+
+const CatalogRouteWithChildren =
+  CatalogRoute._addFileChildren(CatalogRouteChildren)
 
 interface AdminNewRouteChildren {
   AdminNewCategoryRoute: typeof AdminNewCategoryRoute
@@ -252,6 +372,7 @@ const AdminNewRouteWithChildren = AdminNewRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CartRoute: CartRoute,
+  CatalogRoute: CatalogRouteWithChildren,
   ContactsRoute: ContactsRoute,
   AdminLoginRoute: AdminLoginRoute,
   AdminNewRoute: AdminNewRouteWithChildren,

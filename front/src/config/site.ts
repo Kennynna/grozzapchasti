@@ -30,17 +30,22 @@ export const site = {
   contacts: {
     phone: '7 963 707-17-61',
     email: 'm099kk77@mail.ru',
-    address: 'город Грозный, ул Назарбаева, 69',
+    address: '364000, г. Грозный, ул. Назарбаева, 69',
     streetAddress: 'ул. Назарбаева, 69',
     addressLocality: 'Грозный',
     addressRegion: 'Чеченская Республика',
     addressCountry: 'RU',
+    postalCode: '364000',
     hours: 'Пн–Сб, 9:00–18:00',
   },
   geo: {
     region: 'RU-CE',
     placename: 'Грозный',
+    latitude: 43.318015,
+    longitude: 45.698291,
   },
+  // Код из Яндекс.Вебмастера (настройки индексирования → подтверждение). Пустая строка — тег не ставим.
+  yandexVerification: '',
   // Блок «Как заказать» на главной
   orderSteps: [
     {
@@ -80,7 +85,7 @@ export const site = {
     },
   },
   nav: [
-    { to: '/', hash: 'catalog', label: 'Каталог' },
+    { to: '/catalog', label: 'Каталог' },
     { to: '/contacts', label: 'Контакты' },
   ],
   footerNav: [

@@ -1,6 +1,6 @@
 import { Link, createFileRoute, notFound, useNavigate } from '@tanstack/react-router'
 import { Check, Copy, Heart, Plus } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { AdminKebab } from '@/components/admin/AdminKebab'
 import {
@@ -15,6 +15,7 @@ import { QueryStatus } from '@/components/QueryStatus'
 import { ProductPageSkeleton, SuggestedStripSkeleton } from '@/components/query-skeletons'
 import { Button } from '@/components/ui/button'
 import { site } from '@/config/site'
+import { catalogPath, markSlugOf, modelSlugOf } from '@/lib/catalog-path'
 import { formatPrice, relatedPartsFor } from '@/lib/format'
 import { partFitLabel } from '@/lib/part-fit'
 import {
@@ -26,6 +27,7 @@ import {
   partSeoTitle,
   productJsonLd,
 } from '@/lib/seo'
+import { parseLeadingId, partHref, partSlug } from '@/lib/slug'
 import { cn } from '@/lib/utils'
 import {
   ApiError,
@@ -50,20 +52,24 @@ import { selectCartQuantity, useCartStore, useFavoritesStore } from '@/stores'
 export const Route = createFileRoute('/parts/$partId')({
   params: {
     parse: (params) => {
-      const partId = Number(params.partId)
-      if (!Number.isInteger(partId) || partId < 1) {
+      const partId = parseLeadingId(params.partId)
+      if (!partId) {
         throw notFound()
       }
-      return { partId }
+      return { partId: params.partId }
     },
-    stringify: ({ partId }) => ({ partId: String(partId) }),
+    stringify: ({ partId }) => ({ partId }),
   },
   pendingMs: 0,
   pendingComponent: PartPagePending,
   loader: async ({ params }) => {
+    const id = parseLeadingId(params.partId)
+    if (!id) {
+      throw notFound()
+    }
     try {
       const [part] = await Promise.all([
-        queryClient.ensureQueryData(sparePartsQueries.detail(params.partId)),
+        queryClient.ensureQueryData(sparePartsQueries.detail(id)),
         queryClient.ensureQueryData(sparePartsQueries.list()),
         queryClient.ensureQueryData(marksQueries.list()),
         queryClient.ensureQueryData(modelsQueries.list()),
@@ -78,8 +84,8 @@ export const Route = createFileRoute('/parts/$partId')({
     }
   },
   head: ({ loaderData, params }) => {
-    const path = `/parts/${params.partId}`
     const part = loaderData
+    const path = part ? partHref(part) : `/parts/${params.partId}`
     const marks = queryClient.getQueryData(marksQueries.list().queryKey)
     const models = queryClient.getQueryData(modelsQueries.list().queryKey)
     const categories = queryClient.getQueryData(categoriesQueries.list().queryKey)
@@ -113,7 +119,8 @@ function PartPagePending() {
 }
 
 function PartPage() {
-  const { partId } = Route.useParams()
+  const { partId: partParam } = Route.useParams()
+  const partId = parseLeadingId(partParam) ?? 0
   const navigate = useNavigate()
   const partQuery = useSparePartQuery(partId)
   const partsQuery = useSparePartsQuery()
@@ -135,6 +142,21 @@ function PartPage() {
     return relatedPartsFor(partQuery.data, partsQuery.data)
   }, [partQuery.data, partsQuery.data])
 
+  useEffect(() => {
+    const part = partQuery.data
+    if (!part) {
+      return
+    }
+    const pretty = partSlug(part)
+    if (partParam !== pretty) {
+      void navigate({
+        to: '/parts/$partId',
+        params: { partId: pretty },
+        replace: true,
+      })
+    }
+  }, [navigate, partParam, partQuery.data])
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 md:py-16">
       <QueryStatus query={partQuery} skeleton={<ProductPageSkeleton />}>
@@ -146,8 +168,10 @@ function PartPage() {
             <>
               <PartView
                 part={part}
-                markName={mark?.name}
-                modelName={model?.name}
+                mark={mark}
+                model={model}
+                marks={marksQuery.data ?? []}
+                models={modelsQuery.data ?? []}
                 categoryName={category?.name}
                 isAdmin={isAdmin}
                 favorite={favorite}
@@ -183,7 +207,7 @@ function PartPage() {
                   categoryName: category?.name,
                 })}
               />
-              <JsonLd data={breadcrumbJsonLd(breadcrumbTrail(part, mark, model))} />
+              <JsonLd data={breadcrumbJsonLd(breadcrumbTrail(part, mark, model, marksQuery.data ?? [], modelsQuery.data ?? []))} />
             </>
           )
         }}
@@ -205,7 +229,7 @@ function PartPage() {
             onSuccess: () => {
               toast.success('Запчасть удалена')
               setDeleteOpen(false)
-              void navigate({ to: '/' })
+              void navigate({ to: '/catalog' })
             },
           })
         }}
@@ -215,22 +239,30 @@ function PartPage() {
 }
 
 /** Хлебные крошки для микроразметки: те же ссылки, что и в `PartBreadcrumb`. */
-function breadcrumbTrail(part: SparePart, mark?: Mark, model?: Model) {
-  const trail = [{ name: 'Каталог', path: '/' }]
+function breadcrumbTrail(
+  part: SparePart,
+  mark: Mark | undefined,
+  model: Model | undefined,
+  marks: Mark[],
+  models: Model[],
+) {
+  const trail = [{ name: 'Каталог', path: '/catalog' }]
   if (mark) {
-    trail.push({ name: mark.name, path: `/?markId=${mark.id}` })
+    trail.push({ name: mark.name, path: catalogPath({ mark, marks }) })
     if (model) {
-      trail.push({ name: model.name, path: `/?markId=${mark.id}&modelId=${model.id}` })
+      trail.push({ name: model.name, path: catalogPath({ mark, model, marks, models }) })
     }
   }
-  trail.push({ name: part.name, path: `/parts/${part.id}` })
+  trail.push({ name: part.name, path: partHref(part) })
   return trail
 }
 
 function PartView({
   part,
-  markName,
-  modelName,
+  mark,
+  model,
+  marks,
+  models,
   categoryName,
   isAdmin,
   favorite,
@@ -241,8 +273,10 @@ function PartView({
   onDelete,
 }: {
   part: SparePart
-  markName?: string
-  modelName?: string
+  mark?: Mark
+  model?: Model
+  marks: Mark[]
+  models: Model[]
   categoryName?: string
   isAdmin: boolean
   favorite: boolean
@@ -264,11 +298,7 @@ function PartView({
           onEdit={onEdit}
           onDelete={onDelete}
         />
-        <PartBreadcrumb
-          part={part}
-          markName={markName}
-          modelName={modelName}
-        />
+        <PartBreadcrumb part={part} mark={mark} model={model} marks={marks} models={models} />
         <h1 className="text-3xl md:text-4xl">{part.name}</h1>
         {categoryName ? (
           <p className="text-sm text-muted-foreground">{categoryName}</p>
@@ -322,50 +352,54 @@ function PartView({
 
 function PartBreadcrumb({
   part,
-  markName,
-  modelName,
+  mark,
+  model,
+  marks,
+  models,
 }: {
   part: SparePart
-  markName?: string
-  modelName?: string
+  mark?: Mark
+  model?: Model
+  marks: Mark[]
+  models: Model[]
 }) {
   const crumbClass = 'hover:text-foreground'
+  const markSlug = mark ? markSlugOf(mark, marks) : undefined
+  const modelSlug = mark && model ? modelSlugOf(model, models) : undefined
 
   return (
     <nav aria-label="Навигация">
       <ol className="flex flex-wrap items-center text-sm text-muted-foreground">
         <li>
-          <Link to="/" hash="catalog" className={crumbClass}>
+          <Link to="/catalog" className={crumbClass}>
             Каталог
           </Link>
         </li>
-        {part.markId ? (
+        {mark && markSlug ? (
           <>
             <li className="flex items-center">
               <span className="px-2" aria-hidden>
                 /
               </span>
               <Link
-                to="/"
-                search={{ markId: part.markId }}
-                hash="catalog"
+                to="/catalog/$markSlug"
+                params={{ markSlug }}
                 className={crumbClass}
               >
-                {markName ?? 'Марка'}
+                {mark.name}
               </Link>
             </li>
-            {part.modelId ? (
+            {model && modelSlug ? (
               <li className="flex items-center">
                 <span className="px-2" aria-hidden>
                   /
                 </span>
                 <Link
-                  to="/"
-                  search={{ markId: part.markId, modelId: part.modelId }}
-                  hash="catalog"
+                  to="/catalog/$markSlug/$modelSlug"
+                  params={{ markSlug, modelSlug }}
                   className={crumbClass}
                 >
-                  {modelName ?? 'Модель'}
+                  {model.name}
                 </Link>
               </li>
             ) : (

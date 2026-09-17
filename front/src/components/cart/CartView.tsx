@@ -6,6 +6,7 @@ import { CardImage } from '@/components/catalog/CardImage'
 import { CartLinesSkeleton } from '@/components/query-skeletons'
 import { Button } from '@/components/ui/button'
 import { formatPrice } from '@/lib/format'
+import { partSlug } from '@/lib/slug'
 import { orderTotal, type OrderLine } from '@/lib/order-message'
 import { firstImageSrc, useSparePartsQuery, type SparePart } from '@/queries'
 import { useCartStore, type CartItem } from '@/stores'
@@ -15,7 +16,7 @@ function EmptyCart() {
     <div className="mt-8">
       <p className="text-muted-foreground">Корзина пуста.</p>
       <Button className="mt-6" variant="outline" asChild>
-        <Link to="/" hash="catalog">
+        <Link to="/catalog">
           Перейти в каталог
         </Link>
       </Button>
@@ -84,7 +85,7 @@ function AvailableRow({
     <li className="flex gap-4 border-b border-border py-4">
       <Link
         to="/parts/$partId"
-        params={{ partId: part.id }}
+        params={{ partId: partSlug(part) }}
         className="shrink-0"
         aria-label={part.name}
       >
@@ -93,7 +94,7 @@ function AvailableRow({
       <div className="min-w-0 flex-1">
         <Link
           to="/parts/$partId"
-          params={{ partId: part.id }}
+          params={{ partId: partSlug(part) }}
           className="font-heading text-base font-semibold leading-snug hover:text-primary"
         >
           {part.name}

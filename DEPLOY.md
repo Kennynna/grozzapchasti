@@ -293,7 +293,7 @@ sudo nginx -t && sudo systemctl reload nginx
 - Postgres слушает только localhost.
 - Helmet на API, заголовки в `deploy/nginx.conf`.
 - `/admin` и `/cart` закрыты в `robots.txt`; логин, админка, корзина, 404 — `noindex`.
-- Карта сайта: `https://ВАШ_ДОМЕН/sitemap.xml` → `GET /api/sitemap.xml` (главная, контакты, карточки).
+- Карта сайта: `https://ВАШ_ДОМЕН/sitemap.xml` → `GET /api/sitemap.xml` (главная, каталог, контакты, карточки).
 
 Не коммитить `backend/.env`. После деплоя смените пароль Postgres в compose, если оставляли пример.
 

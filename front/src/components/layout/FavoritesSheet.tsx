@@ -14,6 +14,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { formatPrice } from '@/lib/format'
+import { partSlug } from '@/lib/slug'
 import { firstImageSrc, useSparePartsQuery, type SparePart } from '@/queries'
 import { useCartStore, useFavoritesStore } from '@/stores'
 
@@ -40,7 +41,7 @@ function FavoriteRow({
     <li className="flex gap-3 border-b border-border py-3">
       <Link
         to="/parts/$partId"
-        params={{ partId: part.id }}
+        params={{ partId: partSlug(part) }}
         className="shrink-0"
         aria-label={part.name}
         onClick={() => onOpenChange(false)}
@@ -50,7 +51,7 @@ function FavoriteRow({
       <div className="min-w-0 flex-1">
         <Link
           to="/parts/$partId"
-          params={{ partId: part.id }}
+          params={{ partId: partSlug(part) }}
           className="font-heading text-sm font-semibold leading-snug hover:text-primary"
           onClick={() => onOpenChange(false)}
         >
@@ -161,7 +162,7 @@ export function FavoritesSheet({ open, onOpenChange }: FavoritesSheetProps) {
 
         <SheetFooter>
           <Button variant="outline" asChild>
-            <Link to="/" hash="catalog" onClick={() => onOpenChange(false)}>
+            <Link to="/catalog" onClick={() => onOpenChange(false)}>
               Перейти в каталог
             </Link>
           </Button>

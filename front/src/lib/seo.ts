@@ -2,6 +2,7 @@
 // теги из index.html, а per-page теги и JSON-LD видят только краулеры с JS (Google, Яндекс).
 import { site } from '@/config/site'
 import { whatsappChatHref } from '@/lib/order-message'
+import { partHref } from '@/lib/slug'
 import type { SparePart } from '@/queries'
 
 export function absoluteUrl(path: string) {
@@ -68,7 +69,13 @@ export function pageMeta({
       { name: 'keywords', content: keywords },
       { name: 'geo.region', content: site.geo.region },
       { name: 'geo.placename', content: site.geo.placename },
+      { name: 'geo.position', content: `${site.geo.latitude};${site.geo.longitude}` },
+      { name: 'ICBM', content: `${site.geo.latitude}, ${site.geo.longitude}` },
     )
+  }
+
+  if (!noindex && site.yandexVerification) {
+    meta.push({ name: 'yandex-verification', content: site.yandexVerification })
   }
 
   return meta
@@ -100,12 +107,14 @@ function postalAddress() {
     streetAddress: site.contacts.streetAddress,
     addressLocality: site.contacts.addressLocality,
     addressRegion: site.contacts.addressRegion,
+    postalCode: site.contacts.postalCode,
     addressCountry: site.contacts.addressCountry,
   }
 }
 
-function yandexMapsUrl() {
-  return `https://yandex.ru/maps/?text=${encodeURIComponent(site.contacts.address)}`
+export function yandexMapsUrl() {
+  const { latitude, longitude } = site.geo
+  return `https://yandex.ru/maps/?ll=${longitude},${latitude}&z=16&pt=${longitude},${latitude}`
 }
 
 export function storeJsonLd() {
@@ -131,6 +140,11 @@ export function storeJsonLd() {
         telephone: phoneE164(),
         email: site.contacts.email,
         address: postalAddress(),
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: site.geo.latitude,
+          longitude: site.geo.longitude,
+        },
         hasMap: yandexMapsUrl(),
         areaServed: [
           { '@type': 'City', name: site.contacts.addressLocality },
@@ -189,7 +203,7 @@ export function catalogJsonLd(parts: SparePart[]) {
     itemListElement: parts.map((part, index) => ({
       '@type': 'ListItem',
       position: index + 1,
-      url: absoluteUrl(`/parts/${part.id}`),
+      url: absoluteUrl(partHref(part)),
       name: part.name,
     })),
   }
@@ -252,10 +266,10 @@ export function productJsonLd(part: SparePart, labels: PartLabels = {}) {
     isAccessoryOrSparePartFor: fitsFor
       ? { '@type': 'Vehicle', name: fitsFor }
       : undefined,
-    mainEntityOfPage: absoluteUrl(`/parts/${part.id}`),
+    mainEntityOfPage: absoluteUrl(partHref(part)),
     offers: {
       '@type': 'Offer',
-      url: absoluteUrl(`/parts/${part.id}`),
+      url: absoluteUrl(partHref(part)),
       price: part.price,
       priceCurrency: 'RUB',
       itemCondition: 'https://schema.org/NewCondition',
