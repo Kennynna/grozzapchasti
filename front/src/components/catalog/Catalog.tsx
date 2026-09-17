@@ -14,6 +14,7 @@ import {
   useSparePartsQuery,
 } from '@/queries'
 import { useCatalogHydrated, useCatalogStore } from '@/stores'
+import { CatalogPolyhedron } from '@/components/layout/ScatteredParts'
 import {
   CatalogPartsSkeleton,
   CategoryChipsSkeleton,
@@ -155,8 +156,10 @@ export function Catalog() {
   }, [paged.page, patchCatalog, search.page, showGrid])
 
   return (
-    <div className="space-y-10">
-      <MarksStrip
+    <div className="relative flex flex-1 flex-col">
+      <div className="relative z-10 flex-1 space-y-10">
+        {showGrid ? null : <CatalogPolyhedron />}
+        <MarksStrip
         query={marksQuery}
         selectedId={markId}
         isAdmin={isAdmin}
@@ -208,6 +211,7 @@ export function Catalog() {
           />
         </>
       ) : null}
+      </div>
     </div>
   )
 }
@@ -222,8 +226,10 @@ export function CatalogPending({
   const showGrid = Boolean(markId && modelId)
 
   return (
-    <div className="space-y-10" aria-busy="true" aria-live="polite">
-      <section className="space-y-3">
+    <div className="relative flex flex-1 flex-col" aria-busy="true" aria-live="polite">
+      <div className="relative z-10 flex-1 space-y-10">
+        {showGrid ? null : <CatalogPolyhedron />}
+        <section className="space-y-3">
         <div>
           <h2 className="text-lg font-semibold">Марка</h2>
           <p className="text-sm text-muted-foreground">Выберите марку</p>
@@ -251,6 +257,7 @@ export function CatalogPending({
           <CatalogPartsSkeleton />
         </>
       ) : null}
+      </div>
     </div>
   )
 }

@@ -3,6 +3,7 @@ import { type ReactNode, useEffect } from 'react'
 import { RobotsMeta } from '@/components/JsonLd'
 import { Footer } from '@/components/layout/Footer'
 import { Header } from '@/components/layout/Header'
+import { SiteWideParts } from '@/components/layout/ScatteredParts'
 import { Button } from '@/components/ui/button'
 import { site } from '@/config/site'
 import { dropStaticOgTags } from '@/lib/seo'
@@ -21,8 +22,9 @@ export const Route = createRootRoute({
 
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-svh flex-col bg-background">
+    <div className="relative flex min-h-svh flex-col overflow-x-clip bg-background">
       <HeadContent />
+      <SiteWideParts />
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
@@ -34,12 +36,14 @@ function RootError({ error }: { error: Error }) {
   return (
     <Shell>
       <RobotsMeta content="noindex, nofollow" />
-      <div className="mx-auto max-w-6xl px-4 py-16">
-        <h1 className="text-2xl">Не удалось показать страницу</h1>
+      <div className="relative min-h-[50vh] overflow-x-clip">
+        <div className="relative mx-auto max-w-6xl px-4 py-16">
+          <h1 className="text-2xl">Не удалось показать страницу</h1>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <Button className="mt-6" variant="outline" asChild>
           <Link to="/">На главную</Link>
         </Button>
+        </div>
       </div>
     </Shell>
   )
@@ -47,8 +51,9 @@ function RootError({ error }: { error: Error }) {
 
 function NotFound() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16">
+    <div className="relative min-h-[50vh] overflow-x-clip">
       <RobotsMeta content="noindex, nofollow" />
+      <div className="relative mx-auto max-w-6xl px-4 py-16">
       <h1 className="text-2xl">Страница не найдена</h1>
       <p className="mt-2 text-sm text-muted-foreground">
         Такой страницы нет. Вернитесь в каталог и выберите запчасть.
@@ -58,6 +63,7 @@ function NotFound() {
           В каталог
         </Link>
       </Button>
+      </div>
     </div>
   )
 }

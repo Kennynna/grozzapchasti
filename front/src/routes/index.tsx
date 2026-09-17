@@ -44,7 +44,7 @@ function HomePending() {
       <HomeHero />
       <section
         id="catalog"
-        className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
+        className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
       >
         <CatalogPending markId={search.markId} modelId={search.modelId} />
       </section>
@@ -62,7 +62,7 @@ function HomePage() {
       <HomeHero />
       <section
         id="catalog"
-        className="mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
+        className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
       >
         <Catalog />
       </section>

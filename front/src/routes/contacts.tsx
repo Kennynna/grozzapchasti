@@ -29,7 +29,8 @@ function ContactsPage() {
     site.sections.about,
   ]
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16">
+    <div className="relative overflow-x-clip">
+      <div className="relative mx-auto max-w-3xl px-4 py-16">
       <h1 className="text-3xl">Контакты</h1>
       <p className="mt-2 text-muted-foreground">Как с нами связаться и где забрать заказ.</p>
       <dl className="mt-10 grid gap-6 text-sm sm:grid-cols-2">
@@ -105,6 +106,7 @@ function ContactsPage() {
         ))}
       </div>
       <JsonLd data={storeJsonLd()} />
+      </div>
     </div>
   )
 }

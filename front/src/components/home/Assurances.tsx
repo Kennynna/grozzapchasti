@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { ArrowRight, ShieldCheck, Truck, Wallet } from 'lucide-react'
+import { AssurancesParts } from '@/components/layout/ScatteredParts'
 import { site } from '@/config/site'
 
 const cards = [
@@ -10,8 +11,10 @@ const cards = [
 
 export function Assurances() {
   return (
-    <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
-      <ul className="grid gap-4 sm:grid-cols-3 md:gap-6">
+    <section className="relative overflow-x-clip">
+      <AssurancesParts />
+      <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
+        <ul className="grid gap-4 sm:grid-cols-3 md:gap-6">
         {cards.map(({ section, Icon }) => (
           <li
             key={section.id}
@@ -30,7 +33,8 @@ export function Assurances() {
             </Link>
           </li>
         ))}
-      </ul>
+        </ul>
+      </div>
     </section>
   )
 }

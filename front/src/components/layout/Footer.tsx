@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { FooterParts } from '@/components/layout/ScatteredParts'
 import { WhatsAppIcon } from '@/components/WhatsAppIcon'
 import { site } from '@/config/site'
 import { telHref } from '@/lib/format'
@@ -10,8 +11,9 @@ export function Footer() {
   const { phone, address, hours } = site.contacts
 
   return (
-    <footer className="mt-auto border-t border-border bg-secondary">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
+    <footer className="relative mt-auto overflow-hidden border-t border-border bg-secondary">
+      <FooterParts />
+      <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="font-heading text-base font-semibold">{site.name}</p>
           <p className="mt-2 max-w-sm text-sm text-muted-foreground">
@@ -51,7 +53,7 @@ export function Footer() {
           <p>{hours}</p>
         </address>
       </div>
-      <div className="border-t border-border">
+      <div className="relative border-t border-border">
         <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted-foreground">
           © {year} {site.name}. Все права защищены.
         </p>

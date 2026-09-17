@@ -1,11 +1,13 @@
+import { HowToOrderParts } from '@/components/layout/ScatteredParts'
 import { Button } from '@/components/ui/button'
 import { site } from '@/config/site'
 import { whatsappChatHref } from '@/lib/order-message'
 
 export function HowToOrder() {
   return (
-    <section id="how-to-order" className="scroll-mt-16 border-y border-border bg-secondary">
-      <div className="mx-auto max-w-6xl px-4 py-16 md:py-20">
+    <section id="how-to-order" className="relative scroll-mt-16 overflow-hidden border-y border-border bg-secondary">
+      <HowToOrderParts />
+      <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
         <p className="flex items-center gap-2 text-[11px] font-medium tracking-[0.28em] text-primary uppercase">
           <span className="size-1.5 bg-primary" />
           Как заказать

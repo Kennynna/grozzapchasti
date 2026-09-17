@@ -13,9 +13,11 @@ export const Route = createFileRoute('/cart')({
 
 function CartPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="text-3xl">Корзина</h1>
-      <CartView />
+    <div className="relative overflow-x-clip">
+      <div className="relative mx-auto max-w-3xl px-4 py-16">
+        <h1 className="text-3xl">Корзина</h1>
+        <CartView />
+      </div>
     </div>
   )
 }
