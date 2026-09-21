@@ -2,7 +2,7 @@
 export const site = {
   name: 'Zap-Auto',
   // Домен витрины. При смене поправить ещё в index.html, public/robots.txt и public/sitemap.xml
-  url: 'https://grozzapchasti.ru',
+  url: 'https://zapautoshop.ru',
   description:
     'Премиальные автозапчасти в Грозном. Оригинальные и проверенные компоненты, подбор по марке и модели.',
   keywords:

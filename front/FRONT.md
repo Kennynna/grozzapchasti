@@ -39,7 +39,7 @@
   - `/cart`, `/admin/*`, 404 и ошибки — `noindex, nofollow`
   - ЧПУ: `src/lib/slug.ts`, `src/lib/catalog-path.ts` — `/catalog/{mark}/{model}`, `/parts/{id}-{slug}`
   - Регион: `site.contacts.postalCode`, `site.geo.latitude/longitude`, PostalAddress + GeoCoordinates
-  - Яндекс.Вебмастер (не код): добавить сайт, карту `https://grozzapchasti.ru/sitemap.xml`, регион «Грозный», карточку в Яндекс Бизнесе, при желании Метрику и код `site.yandexVerification`
+  - Яндекс.Вебмастер (не код): добавить сайт, карту `https://zapautoshop.ru/sitemap.xml`, регион «Грозный», карточку в Яндекс Бизнесе, при желании Метрику и код `site.yandexVerification`
 - [x] Моки выкинуты
   - `src/config/constants.ts` — только `API_URL`
 
