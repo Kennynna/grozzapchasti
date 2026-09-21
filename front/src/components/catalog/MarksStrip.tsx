@@ -40,7 +40,7 @@ export function MarksStrip({ query, selectedId, onSelect, isAdmin }: MarksStripP
         skeleton={<StripTilesSkeleton />}
       >
         {(items) => (
-          <HorizontalScroller activeKey={selectedId}>
+          <HorizontalScroller activeKey={selectedId} label="Марки">
             <AdminAddTile isAdmin={isAdmin} to="/admin/new/mark" label="Новая марка" />
             {items.map((mark, index) => (
               <MarkTile
@@ -119,15 +119,16 @@ function MarkTile({
     <div className="relative w-36 shrink-0" data-strip-selected={selected ? 'true' : undefined}>
       <button
         type="button"
+        aria-pressed={selected}
         onClick={() => onSelect(selected ? undefined : mark.id)}
         className={cn(
-          'flex w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-colors',
+          'flex w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
           selected
             ? 'border-primary'
             : 'border-border hover:border-muted-foreground/40 hover:bg-accent',
         )}
       >
-        <CardImage src={image} alt={mark.name} priority={priority} sizes="144px" />
+        <CardImage src={image} alt="" priority={priority} sizes="144px" />
         <span className="truncate px-3 py-2 text-sm font-medium">{mark.name}</span>
       </button>
       <AdminKebab

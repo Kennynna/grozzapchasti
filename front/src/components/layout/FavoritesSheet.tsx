@@ -139,7 +139,7 @@ export function FavoritesSheet({ open, onOpenChange }: FavoritesSheetProps) {
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex flex-col gap-0 sm:max-w-md">
+      <SheetContent id="favorites-sheet" className="flex flex-col gap-0 sm:max-w-md">
         <SheetHeader>
           <SheetTitle>Избранное</SheetTitle>
           <SheetDescription>

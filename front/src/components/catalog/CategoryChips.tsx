@@ -47,7 +47,7 @@ export function CategoryChips({
         </div>
         <div className="flex items-center gap-2">
           <div className="relative min-w-0 flex-1 sm:w-56 sm:flex-none">
-            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -164,9 +164,10 @@ function AllCategoriesChip({
   return (
     <button
       type="button"
+      aria-pressed={selected}
       onClick={onSelect}
       className={cn(
-        'shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
+        'shrink-0 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
         selected
           ? 'border-primary bg-primary text-primary-foreground'
           : 'border-border text-muted-foreground hover:bg-accent hover:text-foreground',
@@ -196,9 +197,10 @@ function CategoryChip({
     <div className="flex shrink-0 items-center gap-0.5">
       <button
         type="button"
+        aria-pressed={selected}
         onClick={() => onSelect(selected ? undefined : category.id)}
         className={cn(
-          'rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
+          'rounded-full border px-3 py-1.5 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
           selected
             ? 'border-primary bg-primary text-primary-foreground'
             : 'border-border text-muted-foreground hover:bg-accent hover:text-foreground',

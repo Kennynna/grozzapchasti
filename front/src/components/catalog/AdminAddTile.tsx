@@ -28,7 +28,6 @@ export function AdminAddTile({
   return (
     <Link
       to={to}
-      aria-label={label}
       onClick={(event) => event.stopPropagation()}
       className={cn(
         'flex shrink-0 items-center justify-center border border-dashed border-border text-muted-foreground transition-colors hover:border-primary hover:text-primary',
@@ -38,7 +37,7 @@ export function AdminAddTile({
           'h-full min-h-40 flex-col gap-2 rounded-lg bg-card p-4 md:min-h-64 md:p-6',
       )}
     >
-      <Plus className="size-4" />
+      <Plus className="size-4" aria-hidden />
       <span className="text-xs font-medium">{label}</span>
     </Link>
   )

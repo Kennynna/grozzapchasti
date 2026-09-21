@@ -45,9 +45,10 @@ export function SparePartCard({
           to="/parts/$partId"
           params={{ partId: partSlug(part) }}
           className="block"
-          aria-label={part.name}
+          tabIndex={-1}
+          aria-hidden
         >
-          <CardImage src={image} alt={part.name} />
+          <CardImage src={image} alt="" />
         </Link>
         {onEdit && onDelete ? (
           <AdminKebab
@@ -62,20 +63,28 @@ export function SparePartCard({
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={favorite ? 'Убрать из избранного' : 'В избранное'}
+            aria-label={
+              favorite
+                ? `Убрать ${part.name} из избранного`
+                : `Добавить ${part.name} в избранное`
+            }
             className="bg-background/80 backdrop-blur-sm"
             onClick={(event) => {
               event.stopPropagation()
               toggleFavorite(part.id)
             }}
           >
-            <Heart className={cn(favorite && 'fill-primary text-primary')} />
+            <Heart className={cn(favorite && 'fill-primary text-primary')} aria-hidden />
           </Button>
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
-            aria-label={cartQuantity > 0 ? 'В корзине' : 'Добавить в корзину'}
+            aria-label={
+              cartQuantity > 0
+                ? `${part.name} уже в корзине, добавить ещё`
+                : `Добавить ${part.name} в корзину`
+            }
             className="bg-background/80 backdrop-blur-sm"
             onClick={(event) => {
               event.stopPropagation()
@@ -84,9 +93,9 @@ export function SparePartCard({
             }}
           >
             {cartQuantity > 0 ? (
-              <Check className="text-primary" />
+              <Check className="text-primary" aria-hidden />
             ) : (
-              <Plus />
+              <Plus aria-hidden />
             )}
           </Button>
         </div>

@@ -24,9 +24,14 @@ function Shell({ children }: { children: ReactNode }) {
   return (
     <div className="relative flex min-h-svh flex-col overflow-x-clip bg-background">
       <HeadContent />
+      <a href="#main-content" className="skip-to-content">
+        К содержанию
+      </a>
       <SiteWideParts />
       <Header />
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1 outline-none" tabIndex={-1}>
+        {children}
+      </main>
       <Footer />
     </div>
   )

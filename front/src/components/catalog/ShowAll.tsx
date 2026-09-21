@@ -32,7 +32,7 @@ export function ShowAllTile({ total, onClick, variant = 'tile' }: ShowAllTilePro
         type="button"
         onClick={onClick}
         aria-label={`Показать все, ${total}`}
-        className="shrink-0 rounded-full border border-dashed border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+        className="shrink-0 rounded-full border border-dashed border-border px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors outline-none hover:border-primary hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         Показать все
         <span className="ml-1.5 text-foreground/80">{total}</span>
@@ -46,8 +46,8 @@ export function ShowAllTile({ total, onClick, variant = 'tile' }: ShowAllTilePro
       onClick={onClick}
       aria-label={`Показать все, ${total}`}
       className={cn(
-        'flex w-36 shrink-0 flex-col overflow-hidden rounded-lg border border-dashed border-border bg-card text-left transition-colors',
-        'hover:border-primary hover:bg-accent',
+        'flex w-36 shrink-0 flex-col overflow-hidden rounded-lg border border-dashed border-border bg-card text-left transition-colors outline-none',
+        'hover:border-primary hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50',
       )}
     >
       <div className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-1 bg-secondary">

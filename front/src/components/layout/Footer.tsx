@@ -20,7 +20,7 @@ export function Footer() {
             Премиальные автозапчасти. Качество видно до цены.
           </p>
         </div>
-        <nav className="flex flex-col gap-2 text-sm">
+        <nav aria-label="Подвал" className="flex flex-col gap-2 text-sm">
           {site.footerNav.map((item) => (
             <Link
               key={item.label}
@@ -43,10 +43,11 @@ export function Footer() {
               className="hover:text-foreground inline-flex items-center gap-2"
               href={whatsappChatHref()}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
             >
               <WhatsAppIcon className="size-[18px]" />
               WhatsApp
+              <span className="sr-only">, откроется в новой вкладке</span>
             </a>
           </p>
           <p>{address}</p>

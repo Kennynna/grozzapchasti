@@ -11,9 +11,12 @@ const cards = [
 
 export function Assurances() {
   return (
-    <section className="relative overflow-x-clip">
+    <section aria-labelledby="assurances-title" className="relative overflow-x-clip">
       <AssurancesParts />
       <div className="relative mx-auto max-w-6xl px-4 py-16 md:py-20">
+        <h2 id="assurances-title" className="sr-only">
+          Доставка, гарантия и оплата
+        </h2>
         <ul className="grid gap-4 sm:grid-cols-3 md:gap-6">
         {cards.map(({ section, Icon }) => (
           <li
@@ -29,6 +32,7 @@ export function Assurances() {
               className="mt-auto inline-flex items-center gap-1.5 pt-6 text-sm text-primary transition-colors hover:text-primary-hover"
             >
               Подробнее
+              <span className="sr-only">: {section.title}</span>
               <ArrowRight className="size-3.5" aria-hidden />
             </Link>
           </li>

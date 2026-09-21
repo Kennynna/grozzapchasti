@@ -18,6 +18,7 @@ const router = createRouter({
   defaultPendingMinMs: 0,
   defaultPendingComponent: () => (
     <div className="mx-auto max-w-6xl px-4 py-16" aria-busy="true">
+      <span className="sr-only">Загрузка страницы</span>
       <Skeleton className="h-40 w-full rounded-lg" />
     </div>
   ),

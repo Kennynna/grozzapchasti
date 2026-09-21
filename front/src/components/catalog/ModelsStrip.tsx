@@ -51,7 +51,7 @@ export function ModelsStrip({
         {(items) => {
           const ofMark = items.filter((item) => item.markId === markId)
           return (
-            <HorizontalScroller rows={2} activeKey={selectedId}>
+            <HorizontalScroller rows={2} activeKey={selectedId} label="Модели">
               <AdminAddTile isAdmin={isAdmin} to="/admin/new/model" label="Новая модель" />
               {ofMark.map((model) => (
                 <ModelTile
@@ -128,15 +128,16 @@ function ModelTile({
     <div className="relative w-36" data-strip-selected={selected ? 'true' : undefined}>
       <button
         type="button"
+        aria-pressed={selected}
         onClick={() => onSelect(selected ? undefined : model.id)}
         className={cn(
-          'flex w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-colors',
+          'flex w-full flex-col overflow-hidden rounded-lg border bg-card text-left transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50',
           selected
             ? 'border-primary'
             : 'border-border hover:border-muted-foreground/40 hover:bg-accent',
         )}
       >
-        <CardImage src={image} alt={model.name} sizes="144px" />
+        <CardImage src={image} alt="" sizes="144px" />
         <span className="truncate px-3 py-2 text-sm font-medium">{model.name}</span>
       </button>
       <AdminKebab

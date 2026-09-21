@@ -9,11 +9,13 @@ export function HorizontalScroller({
   className,
   rows = 1,
   activeKey,
+  label,
 }: {
   children: ReactNode
   className?: string
   rows?: 1 | 2
   activeKey?: number
+  label?: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
 
@@ -37,7 +39,7 @@ export function HorizontalScroller({
 
   if (rows === 2) {
     return (
-      <div ref={ref} className={cn('min-w-0', scrollbarClass, className)}>
+      <div ref={ref} role="group" aria-label={label} className={cn('min-w-0', scrollbarClass, className)}>
         {/* Внутренняя сетка w-max, скролл на обёртке — иначе колонки раздувают страницу */}
         <div className="grid w-max grid-flow-col grid-rows-[auto_auto] auto-cols-[9rem] gap-3">
           {children}
@@ -47,8 +49,14 @@ export function HorizontalScroller({
   }
 
   return (
-    <div ref={ref} className={cn('flex min-w-0 gap-3', scrollbarClass, className)}>
+    <div
+      ref={ref}
+      role="group"
+      aria-label={label}
+      className={cn('flex min-w-0 gap-3', scrollbarClass, className)}
+    >
       {children}
     </div>
   )
 }
+

@@ -85,6 +85,7 @@ export const site = {
     },
   },
   nav: [
+    { to: '/', label: 'Главная' },
     { to: '/catalog', label: 'Каталог' },
     { to: '/contacts', label: 'Контакты' },
   ],

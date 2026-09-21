@@ -16,6 +16,7 @@ export function CatalogPending({
 
   return (
     <div className="relative flex flex-1 flex-col" aria-busy="true" aria-live="polite">
+      <span className="sr-only">Загрузка каталога</span>
       <div className="relative z-10 flex-1 space-y-10">
         {showGrid ? null : <CatalogPolyhedron />}
         <section className="space-y-3">

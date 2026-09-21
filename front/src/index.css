@@ -180,3 +180,20 @@
   min-height: 100svh;
   box-sizing: border-box;
 }
+
+.skip-to-content {
+  position: absolute;
+  z-index: 60;
+  top: 0.75rem;
+  left: 0.75rem;
+  transform: translateY(-150%);
+  border-radius: var(--radius);
+  background: var(--background);
+  padding: 0.5rem 0.75rem;
+  color: var(--foreground);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.skip-to-content:focus {
+  transform: none;
+}

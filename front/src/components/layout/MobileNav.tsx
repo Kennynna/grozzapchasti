@@ -12,41 +12,77 @@ import {
 import { site } from '@/config/site'
 import { telHref } from '@/lib/format'
 import { whatsappChatHref } from '@/lib/order-message'
+import { cn } from '@/lib/utils'
 
 type MobileNavProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
+  pathname: string
   isAdmin: boolean
   onLogout: () => void
 }
 
-export function MobileNav({ open, onOpenChange, isAdmin, onLogout }: MobileNavProps) {
+function isNavCurrent(pathname: string, to: string) {
+  if (to === '/') {
+    return pathname === '/'
+  }
+  return pathname === to || pathname.startsWith(`${to}/`)
+}
+
+export function MobileNav({
+  open,
+  onOpenChange,
+  pathname = '',
+  isAdmin,
+  onLogout,
+}: MobileNavProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-72">
+      <SheetContent side="left" className="w-72" id="mobile-nav">
         <SheetHeader>
-          <SheetTitle className="sr-only">{site.name}</SheetTitle>
+          <SheetTitle className="sr-only">Меню</SheetTitle>
         </SheetHeader>
-        <nav className="flex flex-col gap-1 px-4">
-          <Link
-            to="/catalog"
-            className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-            onClick={() => onOpenChange(false)}
-          >
-            Каталог
-          </Link>
-          <Link
-            to="/contacts"
-            className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
-            onClick={() => onOpenChange(false)}
-          >
-            Контакты
-          </Link>
+        <nav aria-label="Мобильное меню" className="flex flex-col gap-1 px-4">
+          {site.nav.map((item) => {
+            const current = isNavCurrent(pathname, item.to)
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                aria-current={current ? 'page' : undefined}
+                className={cn(
+                  'inline-flex items-center gap-2 rounded-md px-2 py-2.5 font-heading text-[11px] font-medium tracking-[0.28em] uppercase transition-colors',
+                  current
+                    ? 'bg-muted text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-primary',
+                )}
+                onClick={() => onOpenChange(false)}
+              >
+                {current ? (
+                  <span className="size-1.5 shrink-0 bg-primary" aria-hidden />
+                ) : (
+                  <span className="size-1.5 shrink-0" aria-hidden />
+                )}
+                {item.label}
+              </Link>
+            )
+          })}
           <Link
             to="/cart"
-            className="rounded-md px-2 py-2 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-current={pathname.startsWith('/cart') ? 'page' : undefined}
+            className={cn(
+              'inline-flex items-center gap-2 rounded-md px-2 py-2.5 font-heading text-[11px] font-medium tracking-[0.28em] uppercase transition-colors',
+              pathname.startsWith('/cart')
+                ? 'bg-muted text-primary'
+                : 'text-muted-foreground hover:bg-muted hover:text-primary',
+            )}
             onClick={() => onOpenChange(false)}
           >
+            {pathname.startsWith('/cart') ? (
+              <span className="size-1.5 shrink-0 bg-primary" aria-hidden />
+            ) : (
+              <span className="size-1.5 shrink-0" aria-hidden />
+            )}
             Корзина
           </Link>
           {isAdmin ? (
@@ -77,6 +113,7 @@ export function MobileNav({ open, onOpenChange, isAdmin, onLogout }: MobileNavPr
           >
             <WhatsAppIcon />
             Написать в WhatsApp
+            <span className="sr-only">, откроется в новой вкладке</span>
           </a>
           <p className="text-muted-foreground">{site.contacts.hours}</p>
         </div>

@@ -33,10 +33,22 @@ function HomePage() {
     <>
       <LegacyCatalogRedirect />
       <HomeHero />
-      <Suspense fallback={<div className="min-h-112" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div className="min-h-112" aria-busy="true" aria-live="polite">
+            <span className="sr-only">Загрузка блока «Как заказать»</span>
+          </div>
+        }
+      >
         <HowToOrder />
       </Suspense>
-      <Suspense fallback={<div className="min-h-96" aria-hidden />}>
+      <Suspense
+        fallback={
+          <div className="min-h-96" aria-busy="true" aria-live="polite">
+            <span className="sr-only">Загрузка блока условий</span>
+          </div>
+        }
+      >
         <Assurances />
       </Suspense>
       <JsonLd data={storeJsonLd()} />

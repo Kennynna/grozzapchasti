@@ -30,6 +30,7 @@ export function QueryStatus<T>({
   if (status === 'loading') {
     return (
       <div aria-busy="true" aria-live="polite">
+        <span className="sr-only">Загрузка</span>
         {skeleton}
       </div>
     )

@@ -367,7 +367,7 @@ function PartBreadcrumb({
   const modelSlug = mark && model ? modelSlugOf(model, models) : undefined
 
   return (
-    <nav aria-label="Навигация">
+    <nav aria-label="Хлебные крошки">
       <ol className="flex flex-wrap items-center text-sm text-muted-foreground">
         <li>
           <Link to="/catalog" className={crumbClass}>

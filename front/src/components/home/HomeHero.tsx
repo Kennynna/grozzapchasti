@@ -9,8 +9,11 @@ const CY = 240
 
 export function HomeHero() {
   return (
-    <section className="relative overflow-hidden border-b border-border">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_78%_42%,rgba(184,135,76,0.12),transparent_42%),radial-gradient(ellipse_at_12%_0%,rgba(184,135,76,0.04),transparent_36%)]" />
+    <section aria-labelledby="hero-title" className="relative overflow-hidden border-b border-border">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_78%_42%,rgba(184,135,76,0.12),transparent_42%),radial-gradient(ellipse_at_12%_0%,rgba(184,135,76,0.04),transparent_36%)]"
+      />
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.14] bg-[linear-gradient(rgba(184,135,76,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(184,135,76,0.18)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_at_70%_45%,black_18%,transparent_72%)]"
@@ -19,10 +22,10 @@ export function HomeHero() {
       <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:py-24 lg:py-28">
         <div className="flex flex-col gap-6">
           <p className="flex items-center gap-2 text-[11px] font-medium tracking-[0.28em] text-primary uppercase">
-            <span className="size-1.5 bg-primary" />
+            <span className="size-1.5 bg-primary" aria-hidden />
             {site.heroEyebrow}
           </p>
-          <h1 className="max-w-xl text-4xl leading-[1.12] md:text-5xl lg:text-6xl">
+          <h1 id="hero-title" className="max-w-xl text-4xl leading-[1.12] md:text-5xl lg:text-6xl">
             {site.heroTitle}
           </h1>
           <p className="max-w-md text-base text-muted-foreground md:text-lg">
