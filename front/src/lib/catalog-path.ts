@@ -20,6 +20,17 @@ export function findModelBySlug(models: Model[], markId: number, slug: string) {
   return ofMark.find((model) => uniqueSlug(model.name, model.id, ofMark) === slug)
 }
 
+export function parseCatalogPath(pathname: string) {
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments[0] !== 'catalog') {
+    return {}
+  }
+  return {
+    markSlug: segments[1],
+    modelSlug: segments[2],
+  }
+}
+
 export function catalogPath(options: {
   mark?: Mark
   model?: Model

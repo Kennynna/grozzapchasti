@@ -20,7 +20,7 @@
   - Ключи доменные: `marksKeys` / `modelsKeys` / `categoriesKeys` / `sparePartsKeys` / `authKeys`
   - queryFn рядом с хуками в том же файле (`marks.ts`, `models.ts`, …)
   - update / delete / удаление фото — optimistic + rollback; create — `invalidateQueries` списков
-  - UI-состояния: `src/queries/status.ts` + `src/components/QueryStatus.tsx` (loading, error, empty, background-refetch, stale). У `QueryStatus` скелетон обязателен. Заготовки — `src/components/query-skeletons.tsx`. Пока loader роута ждёт запрос, тот же скелетон в `pendingComponent` (`pendingMs: 0`), иначе пустой main. Мутации (создание / сохранение / удаление / логин): `src/components/mutation-ui.tsx` — оверлей со спиннером + `SubmitButton`.
+  - UI-состояния: `src/queries/status.ts` + `src/components/QueryStatus.tsx` (loading, error, empty, background-refetch, stale). У `QueryStatus` скелетон обязателен. Заготовки — `src/components/query-skeletons.tsx`. Первый заход на `/` — `pendingMs: 0` + `HomePending`. Каталог `/catalog/*` не сносит блок в скелетон при смене марки/модели: `defaultPendingMs: 300`, `defaultPendingMinMs: 0`, `CatalogSection` живёт в layout `catalog.tsx`. Мутации (создание / сохранение / удаление / логин): `src/components/mutation-ui.tsx` — оверлей со спиннером + `SubmitButton`.
   - `src/queries/http.ts` — fetch, JWT, `ApiError` из `{ statusCode, message, details? }`
   - `src/queries/auth-token.ts` — JWT в `sessionStorage`; 401 и `logout()` сбрасывают кэш `auth`
 - [x] Корзина и избранное (сторы)
@@ -253,7 +253,7 @@ front/src/
    - `src/components/ui/button.tsx` — hover CTA на `--primary-hover`
 2. [x] TanStack Router + layout (шапка/подвал/мобиле) + пустые страницы.
    - `vite.config.ts` — `@tanstack/router-plugin` **перед** React-плагином
-   - `src/main.tsx` — `RouterProvider` вместо `App.tsx` (файл удалён); `defaultPendingMs: 0` и запасной скелетон, пока loader роута без своего `pendingComponent`
+   - `src/main.tsx` — `RouterProvider` вместо `App.tsx` (файл удалён); `defaultPendingMs: 300` и `defaultPendingMinMs: 0`, иначе клик по марке/модели сразу сносит каталог в скелетон; запасной скелетон, пока loader роута без своего `pendingComponent`
    - `src/routes/` — file-based роуты из карты выше; `admin.new.tsx` редиректит без JWT
    - `src/routeTree.gen.ts` — генерирует плагин, не править руками
    - `src/components/layout/Header.tsx` — лого (`hidden md:flex`), Каталог/Контакты, избранное, корзина, burger
@@ -261,8 +261,9 @@ front/src/
    - `src/queries/auth.ts` — `useIsAdmin()` = JWT + `useMeQuery` ok
    - Главная пока рендерит старые `Marks.root` / `Models.root` / `Zapchasti.root` — заменить на шаге 3
 3. [x] Главная на API: ленты, фильтры в search-params, сетка, пустые состояния.
-   - `src/routes/index.tsx` — `validateSearch` для старых `markId`/`modelId` (редирект на ЧПУ); `#catalog` — `min-h-[calc(100svh-4rem)]` под sticky-шапку; `pendingMs: 0` + `HomePending`
-   - `src/routes/catalog.tsx`, `catalog.index.tsx`, `catalog.$markSlug.tsx`, `catalog.$markSlug.index.tsx`, `catalog.$markSlug.$modelSlug.tsx` — ЧПУ каталога `/catalog/{mark}/{model}`
+   - `src/routes/index.tsx` — `validateSearch` для старых `markId`/`modelId` (редирект на ЧПУ); `#catalog` — `min-h-[calc(100svh-4rem)]` под sticky-шапку; `pendingMs: 0` + `HomePending` (только первый заход на `/`)
+   - `src/routes/catalog.tsx` — layout держит `CatalogSection`, чтобы смена марки/модели не размонтировала весь блок; `pendingComponent` только здесь. Дочерние `/catalog/*` — SEO/`notFound`, `pendingComponent: () => null`
+   - `src/routes/catalog.index.tsx`, `catalog.$markSlug.tsx`, `catalog.$markSlug.index.tsx`, `catalog.$markSlug.$modelSlug.tsx` — ЧПУ каталога `/catalog/{mark}/{model}`
    - `src/components/home/HomeHero.tsx` — hero главной: схема диска, техническая сетка, три подписи из `site.heroHighlights`
    - `src/lib/catalog-search.ts` — парсинг URL (марка / модель / категория / `page`); `CATALOG_PAGE_SIZE = 14`
    - `src/stores/catalog.ts` — persist выбранных марки / модели / категории
@@ -327,7 +328,7 @@ front/src/
     - `Catalog` пишет и URL, и стор в `patchCatalog`. `PriceFilter.tsx` удалён, `priceMin`/`priceMax` из URL убраны
 12. [x] Поиск по имени и артикулу — **снят**. Поля нет, `q` из URL убран. `CatalogSearchField.tsx` удалён. Сетка только при марке и модели.
 13. [x] Страница запчасти + галерея.
-    - `src/routes/parts.$partId.tsx` — `/parts/{id}-{slug}`, loader `sparePartsQueries.detail`, 404 → `notFound`; `pendingMs: 0` + `PartPagePending` (`ProductPageSkeleton`)
+    - `src/routes/parts.$partId.tsx` — `/parts/{id}-{slug}`, loader `sparePartsQueries.detail`, 404 → `notFound`; `PartPagePending` (`ProductPageSkeleton`), pending по `defaultPendingMs`
     - `src/components/catalog/ImageGallery.tsx` — до 3 фото, стрелки и превью
     - Карточка/корзина/избранное ведут на страницу. Артикул копируется. Telegram — `TelegramOrderActions`
     - На карточке `+` / галочка вместо сумки с бейджем (`SparePartCard`)
@@ -352,7 +353,7 @@ front/src/
     - `src/components/layout/FavoritesSheet.tsx` — клик по товару закрывает sheet
     - `src/routes/__root.tsx` — `errorComponent` в том же Shell (шапка/подвал)
     - пагинация основной сетки: 14 шт., `page` в URL, `CatalogPagination.tsx`; смена фильтров сбрасывает страницу
-    - скелетоны запросов: `src/components/query-skeletons.tsx`; `QueryStatus` без скелетона не собрать. Главная и `/parts/$partId` — ещё `pendingComponent`, пока loader ждёт API. Корзина, избранное, логин, селекты админки — те же заготовки.
+    - скелетоны запросов: `src/components/query-skeletons.tsx`; `QueryStatus` без скелетона не собрать. Первый заход на `/` — `HomePending`; `/catalog/*` не сносит выбранный каталог в скелетон при смене марки/модели. Корзина, избранное, логин, селекты админки — те же заготовки.
     - лоадеры мутаций: `src/components/mutation-ui.tsx` (`MutationBusy`, `SubmitButton`, `Spinner`). Создание / сохранение / удаление / логин / удаление фото.
     - деплой: [`../DEPLOY.md`](../DEPLOY.md), шаблоны в `deploy/`. Пароль админа не `admin` (Chrome «утечка»). HTTPS обязателен.
 

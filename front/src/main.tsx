@@ -12,7 +12,10 @@ const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 30_000,
-  defaultPendingMs: 0,
+  // Не показывать pending, пока loader не задержался: иначе клик по марке/модели
+  // сразу сносит каталог в скелетон. pendingMinMs: 0 — не держать скелетон искусственно.
+  defaultPendingMs: 300,
+  defaultPendingMinMs: 0,
   defaultPendingComponent: () => (
     <div className="mx-auto max-w-6xl px-4 py-16" aria-busy="true">
       <Skeleton className="h-40 w-full rounded-lg" />

@@ -1,14 +1,11 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { CatalogPending, CatalogSection } from '@/components/catalog/Catalog'
-import { JsonLd } from '@/components/JsonLd'
 import { site } from '@/config/site'
 import { findMarkBySlug } from '@/lib/catalog-path'
 import { ensureCatalogQueries } from '@/lib/catalog-data'
-import { canonical, pageMeta, storeJsonLd } from '@/lib/seo'
+import { canonical, pageMeta } from '@/lib/seo'
 
 export const Route = createFileRoute('/catalog/$markSlug/')({
-  pendingMs: 0,
-  pendingComponent: CatalogMarkPending,
+  pendingComponent: () => null,
   loader: async ({ params }) => {
     const [marks] = await ensureCatalogQueries()
     const mark = findMarkBySlug(marks, params.markSlug)
@@ -30,23 +27,5 @@ export const Route = createFileRoute('/catalog/$markSlug/')({
       links: canonical(path),
     }
   },
-  component: CatalogMarkPage,
+  component: () => null,
 })
-
-function CatalogMarkPending() {
-  return (
-    <section className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl flex-col px-4 py-12">
-      <CatalogPending markId={1} />
-    </section>
-  )
-}
-
-function CatalogMarkPage() {
-  const { markSlug } = Route.useParams()
-  return (
-    <>
-      <CatalogSection markSlug={markSlug} />
-      <JsonLd data={storeJsonLd()} />
-    </>
-  )
-}

@@ -7,7 +7,13 @@ import {
   CategoryChipsSkeleton,
   StripTilesSkeleton,
 } from '@/components/query-skeletons'
-import { catalogNav, catalogPath, findMarkBySlug, findModelBySlug } from '@/lib/catalog-path'
+import {
+  catalogNav,
+  catalogPath,
+  findMarkBySlug,
+  findModelBySlug,
+  parseCatalogPath,
+} from '@/lib/catalog-path'
 import {
   compactCatalogSearch,
   paginateCatalog,
@@ -29,14 +35,13 @@ import { ModelsStrip } from './ModelsStrip'
 import { SparePartsGrid } from './SparePartsGrid'
 
 type CatalogProps = {
-  markSlug?: string
-  modelSlug?: string
   showHeading?: boolean
 }
 
-export function Catalog({ markSlug, modelSlug, showHeading = false }: CatalogProps = {}) {
+export function Catalog({ showHeading = false }: CatalogProps = {}) {
   const navigate = useNavigate()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const { markSlug, modelSlug } = parseCatalogPath(pathname)
   const search = useSearch({ strict: false }) as CatalogSearch
   const isAdmin = useIsAdmin()
   const catalogHydrated = useCatalogHydrated()
@@ -290,19 +295,13 @@ export function Catalog({ markSlug, modelSlug, showHeading = false }: CatalogPro
   )
 }
 
-export function CatalogSection({
-  markSlug,
-  modelSlug,
-}: {
-  markSlug?: string
-  modelSlug?: string
-}) {
+export function CatalogSection() {
   return (
     <section
       id="catalog"
       className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
     >
-      <Catalog markSlug={markSlug} modelSlug={modelSlug} showHeading />
+      <Catalog showHeading />
     </section>
   )
 }

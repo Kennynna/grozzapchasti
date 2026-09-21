@@ -1,14 +1,11 @@
 import { createFileRoute, notFound } from '@tanstack/react-router'
-import { CatalogPending, CatalogSection } from '@/components/catalog/Catalog'
-import { JsonLd } from '@/components/JsonLd'
 import { site } from '@/config/site'
 import { findMarkBySlug, findModelBySlug } from '@/lib/catalog-path'
 import { ensureCatalogQueries } from '@/lib/catalog-data'
-import { canonical, pageMeta, storeJsonLd } from '@/lib/seo'
+import { canonical, pageMeta } from '@/lib/seo'
 
 export const Route = createFileRoute('/catalog/$markSlug/$modelSlug')({
-  pendingMs: 0,
-  pendingComponent: CatalogModelPending,
+  pendingComponent: () => null,
   loader: async ({ params }) => {
     const [marks, models] = await ensureCatalogQueries()
     const mark = findMarkBySlug(marks, params.markSlug)
@@ -34,23 +31,5 @@ export const Route = createFileRoute('/catalog/$markSlug/$modelSlug')({
       links: canonical(path),
     }
   },
-  component: CatalogModelPage,
+  component: () => null,
 })
-
-function CatalogModelPending() {
-  return (
-    <section className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl flex-col px-4 py-12">
-      <CatalogPending markId={1} modelId={1} />
-    </section>
-  )
-}
-
-function CatalogModelPage() {
-  const { markSlug, modelSlug } = Route.useParams()
-  return (
-    <>
-      <CatalogSection markSlug={markSlug} modelSlug={modelSlug} />
-      <JsonLd data={storeJsonLd()} />
-    </>
-  )
-}

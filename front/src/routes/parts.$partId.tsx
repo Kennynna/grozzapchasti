@@ -60,7 +60,6 @@ export const Route = createFileRoute('/parts/$partId')({
     },
     stringify: ({ partId }) => ({ partId }),
   },
-  pendingMs: 0,
   pendingComponent: PartPagePending,
   loader: async ({ params }) => {
     const id = parseLeadingId(params.partId)
