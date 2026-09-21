@@ -3,11 +3,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { JsonLd } from '@/components/JsonLd'
 import { CatalogPolyhedron } from '@/components/layout/ScatteredParts'
 import {
-  CatalogPartsSkeleton,
-  CategoryChipsSkeleton,
-  StripTilesSkeleton,
-} from '@/components/query-skeletons'
-import {
   catalogNav,
   catalogPath,
   findMarkBySlug,
@@ -101,16 +96,6 @@ export function Catalog({ showHeading = false }: CatalogProps = {}) {
         categoryId: next.categoryId,
         page: next.page,
       })
-      if (!nextMark && pathname === '/') {
-        void navigate({
-          to: '/',
-          search: {},
-          hash: 'catalog',
-          replace: true,
-          resetScroll: false,
-        })
-        return
-      }
       void navigate({
         to: nav.to,
         params: nav.params,
@@ -127,7 +112,6 @@ export function Catalog({ showHeading = false }: CatalogProps = {}) {
       modelId,
       models,
       navigate,
-      pathname,
       replaceSelection,
       search.page,
     ],
@@ -137,8 +121,8 @@ export function Catalog({ showHeading = false }: CatalogProps = {}) {
     if (!catalogHydrated || hydratedFromStore.current) {
       return
     }
-    hydratedFromStore.current = true
     if (markId || modelId || categoryId || search.markId || search.modelId) {
+      hydratedFromStore.current = true
       replaceSelection({
         markId: markId ?? search.markId,
         modelId: modelId ?? search.modelId,
@@ -146,9 +130,14 @@ export function Catalog({ showHeading = false }: CatalogProps = {}) {
       })
       return
     }
-    if (pathname !== '/') {
+    // Главную не трогаем: иначе persist уводит с `/` на `/catalog/{mark}` и hero пропадает.
+    if (pathname !== '/catalog' && pathname !== '/catalog/') {
       return
     }
+    if (!marksQuery.data) {
+      return
+    }
+    hydratedFromStore.current = true
     const stored = useCatalogStore.getState()
     if (!stored.markId && !stored.modelId && !stored.categoryId) {
       return
@@ -160,9 +149,13 @@ export function Catalog({ showHeading = false }: CatalogProps = {}) {
     })
   }, [
     catalogHydrated,
+    marksQuery.data,
     search.categoryId,
     search.markId,
     search.modelId,
+    markId,
+    modelId,
+    categoryId,
     patchCatalog,
     pathname,
     replaceSelection,
@@ -303,51 +296,5 @@ export function CatalogSection() {
     >
       <Catalog showHeading />
     </section>
-  )
-}
-
-export function CatalogPending({
-  markId,
-  modelId,
-}: {
-  markId?: number
-  modelId?: number
-}) {
-  const showGrid = Boolean(markId && modelId)
-
-  return (
-    <div className="relative flex flex-1 flex-col" aria-busy="true" aria-live="polite">
-      <div className="relative z-10 flex-1 space-y-10">
-        {showGrid ? null : <CatalogPolyhedron />}
-        <section className="space-y-3">
-        <div>
-          <h2 className="text-lg font-semibold">Марка</h2>
-          <p className="text-sm text-muted-foreground">Выберите марку</p>
-        </div>
-        <StripTilesSkeleton />
-      </section>
-      {markId ? (
-        <section className="space-y-3">
-          <div>
-            <h2 className="text-lg font-semibold">Модель</h2>
-            <p className="text-sm text-muted-foreground">Выберите модель</p>
-          </div>
-          <StripTilesSkeleton rows={2} />
-        </section>
-      ) : null}
-      {showGrid ? (
-        <>
-          <section className="space-y-3">
-            <div>
-              <h2 className="text-lg font-semibold">Категория</h2>
-              <p className="text-sm text-muted-foreground">Выберите категорию</p>
-            </div>
-            <CategoryChipsSkeleton />
-          </section>
-          <CatalogPartsSkeleton />
-        </>
-      ) : null}
-      </div>
-    </div>
   )
 }

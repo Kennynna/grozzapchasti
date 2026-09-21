@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { BadgeCheck, ScanLine, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { site } from '@/config/site'
@@ -12,7 +13,7 @@ export function HomeHero() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_78%_42%,rgba(184,135,76,0.12),transparent_42%),radial-gradient(ellipse_at_12%_0%,rgba(184,135,76,0.04),transparent_36%)]" />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.14] [background-image:linear-gradient(rgba(184,135,76,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(184,135,76,0.18)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_at_70%_45%,black_18%,transparent_72%)]"
+        className="pointer-events-none absolute inset-0 opacity-[0.14] bg-[linear-gradient(rgba(184,135,76,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(184,135,76,0.18)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(ellipse_at_70%_45%,black_18%,transparent_72%)]"
       />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-16 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:gap-8 md:py-24 lg:py-28">
@@ -29,7 +30,7 @@ export function HomeHero() {
           </p>
           <div className="flex flex-wrap gap-3">
             <Button size="lg" asChild>
-              <a href="#catalog">Перейти в каталог</a>
+              <Link to="/catalog">Перейти в каталог</Link>
             </Button>
           </div>
         </div>

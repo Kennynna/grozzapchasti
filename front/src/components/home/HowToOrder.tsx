@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { HowToOrderParts } from '@/components/layout/ScatteredParts'
 import { Button } from '@/components/ui/button'
 import { site } from '@/config/site'
@@ -31,7 +32,7 @@ export function HowToOrder() {
             </a>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <a href="#catalog">Перейти в каталог</a>
+            <Link to="/catalog">Перейти в каталог</Link>
           </Button>
         </div>
       </div>

@@ -1,22 +1,23 @@
+import { lazy, Suspense, useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
-import { Catalog, CatalogPending } from '@/components/catalog/Catalog'
-import { Assurances } from '@/components/home/Assurances'
+import { useQuery } from '@tanstack/react-query'
 import { HomeHero } from '@/components/home/HomeHero'
-import { HowToOrder } from '@/components/home/HowToOrder'
 import { JsonLd } from '@/components/JsonLd'
 import { site } from '@/config/site'
 import { catalogNav } from '@/lib/catalog-path'
-import { ensureCatalogQueries } from '@/lib/catalog-data'
 import { validateCatalogSearch } from '@/lib/catalog-search'
-import { catalogJsonLd, canonical, faqJsonLd, pageMeta, storeJsonLd } from '@/lib/seo'
-import { useMarksQuery, useModelsQuery, useSparePartsQuery } from '@/queries'
+import { canonical, faqJsonLd, pageMeta, storeJsonLd } from '@/lib/seo'
+import { marksQueries, modelsQueries } from '@/queries'
+
+const HowToOrder = lazy(() =>
+  import('@/components/home/HowToOrder').then((module) => ({ default: module.HowToOrder })),
+)
+const Assurances = lazy(() =>
+  import('@/components/home/Assurances').then((module) => ({ default: module.Assurances })),
+)
 
 export const Route = createFileRoute('/')({
   validateSearch: validateCatalogSearch,
-  pendingMs: 0,
-  pendingComponent: HomePending,
-  loader: () => ensureCatalogQueries(),
   head: () => ({
     meta: pageMeta({
       title: `${site.heroTitle} в Грозном · ${site.name}`,
@@ -27,42 +28,19 @@ export const Route = createFileRoute('/')({
   component: HomePage,
 })
 
-function HomePending() {
-  return (
-    <>
-      <HomeHero />
-      <section
-        id="catalog"
-        className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
-      >
-        <CatalogPending />
-      </section>
-      <HowToOrder />
-      <Assurances />
-    </>
-  )
-}
-
 function HomePage() {
-  const partsQuery = useSparePartsQuery()
-
   return (
     <>
       <LegacyCatalogRedirect />
       <HomeHero />
-      <section
-        id="catalog"
-        className="relative mx-auto flex min-h-[calc(100svh-4rem)] max-w-6xl scroll-mt-16 flex-col px-4 py-12"
-      >
-        <Catalog />
-      </section>
-      <HowToOrder />
-      <Assurances />
+      <Suspense fallback={<div className="min-h-112" aria-hidden />}>
+        <HowToOrder />
+      </Suspense>
+      <Suspense fallback={<div className="min-h-96" aria-hidden />}>
+        <Assurances />
+      </Suspense>
       <JsonLd data={storeJsonLd()} />
       <JsonLd data={faqJsonLd()} />
-      {partsQuery.data && partsQuery.data.length > 0 ? (
-        <JsonLd data={catalogJsonLd(partsQuery.data)} />
-      ) : null}
     </>
   )
 }
@@ -70,8 +48,15 @@ function HomePage() {
 function LegacyCatalogRedirect() {
   const search = Route.useSearch()
   const navigate = useNavigate()
-  const marksQuery = useMarksQuery()
-  const modelsQuery = useModelsQuery()
+  const hasLegacy = Boolean(search.markId)
+  const marksQuery = useQuery({
+    ...marksQueries.list(),
+    enabled: hasLegacy,
+  })
+  const modelsQuery = useQuery({
+    ...modelsQueries.list(),
+    enabled: hasLegacy,
+  })
 
   useEffect(() => {
     if (!search.markId || !marksQuery.data) {
@@ -110,4 +95,3 @@ function LegacyCatalogRedirect() {
 
   return null
 }
-
