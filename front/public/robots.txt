@@ -13,6 +13,6 @@ Disallow: /admin/
 Disallow: /cart
 Clean-param: page&markId&modelId&categoryId /
 Clean-param: page&categoryId /catalog
-Host: https://grozzapchasti.ru
+Host: https://zapautoshop.ru
 
-Sitemap: https://grozzapchasti.ru/sitemap.xml
+Sitemap: https://zapautoshop.ru/sitemap.xml

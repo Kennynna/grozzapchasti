@@ -11,7 +11,7 @@ function xmlEscape(value: string) {
 }
 
 function siteOrigin() {
-  return (process.env.FRONTEND_ORIGIN ?? 'https://grozzapchasti.ru').replace(
+  return (process.env.FRONTEND_ORIGIN ?? 'https://zapautoshop.ru').replace(
     /\/$/,
     '',
   );

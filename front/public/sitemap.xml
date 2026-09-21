@@ -2,6 +2,6 @@
 <!-- Index: product URLs come from GET /api/sitemap.xml. Domain is duplicated in src/config/site.ts -->
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <sitemap>
-    <loc>https://grozzapchasti.ru/api/sitemap.xml</loc>
+    <loc>https://zapautoshop.ru/api/sitemap.xml</loc>
   </sitemap>
 </sitemapindex>
